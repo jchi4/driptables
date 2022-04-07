@@ -118,6 +118,35 @@ class Ui_MainWindow(object):
         boxes = {'chain':self.RuleChain,'protocol':self.TrafficType,'action':self.Action,'source':self.SrcIP,'src_port':self.SrcPort,'destination':self.DstIP,'dst_port':self.DstPort}
         rule_table.append(boxes)
 
+        rules = {}
+        each = ''
+        #Input, Forward, Output, Prerouting
+        each = boxes['chain']
+        rules['chain'] = each.currentText()
+        #TCP, UDP, IP, ICMP
+        each = boxes['protocol']
+        rules['protocol'] = each.currentText()
+        #Accept, Drop, Reject
+        each = boxes['action']
+        rules['action'] = each.currentText()
+        #Source IP Address
+        each = boxes['source']
+        rules['source'] = each.toPlainText()
+        #Source Port Number
+        each = boxes['src_port']
+        rules['src_port'] = each.toPlainText()
+        #Destination IP Address
+        each = boxes['destination']
+        rules['destination'] = each.toPlainText()
+        #Destination Port Number
+        each = boxes['dst_port']
+        rules['dst_port'] = each.toPlainText()
+        #print(rules) - Rule testing
+
+        commandline = subprocess.Popen([f"sudo iptables --append {rules['chain']} --protocol {rules['protocol']} --jump {rules['action']} --src {rules['source']} --sport {rules['src_port']} --dst {rules['destination']} --dport {rules['dst_port']}"], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+        #Testing the append rule button
+        #print(f"sudo iptables --append {rules['chain']} --protocol {rules['protocol']} --jump {rules['action']} --src {rules['source']} --sport {rules['src_port']} --dst {rules['destination']} --dport {rules['dst_port']}")
+        output, stderr_output = commandline.communicate()
 
 if __name__ == "__main__":
     import sys
