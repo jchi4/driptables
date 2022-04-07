@@ -83,7 +83,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "iptables"))
         self.RuleChain.setItemText(0, _translate("MainWindow", "Rule Chain"))
         self.RuleChain.setItemText(1, _translate("MainWindow", "INPUT"))
         self.RuleChain.setItemText(2, _translate("MainWindow", "FORWARD"))
