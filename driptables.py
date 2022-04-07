@@ -2,10 +2,20 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import subprocess
 import os
+rule_table = []
 
 class Ui_MainWindow(object):
 
     def setupUi(self, MainWindow):
+        #global variables to grab value for iptable command
+        global RuleChain
+        global TrafficType
+        global Action
+        global SrcIP
+        global SrcPort
+        global DstIP
+        global DstPort
+        #GUI skeleton code
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1407, 966)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
@@ -48,6 +58,8 @@ class Ui_MainWindow(object):
         self.AppendRule = QtWidgets.QPushButton(self.centralwidget)
         self.AppendRule.setGeometry(QtCore.QRect(570, 630, 201, 91))
         self.AppendRule.setObjectName("AppendRule")
+        #added functionality to when the Append Rule button is clicked
+        self.AppendRule.clicked.connect(self.add_rule_button) #calls the add_rule_button function
         self.SrcPort = QtWidgets.QTextEdit(self.centralwidget)
         self.SrcPort.setGeometry(QtCore.QRect(780, 250, 71, 61))
         self.SrcPort.setObjectName("SrcPort")
@@ -98,6 +110,14 @@ class Ui_MainWindow(object):
         self.SrcPort.setPlaceholderText(_translate("MainWindow", "Src Port"))
         self.DstIP.setPlaceholderText(_translate("MainWindow", "Destination IP"))
         self.DstPort.setPlaceholderText(_translate("MainWindow", "Dest IP"))
+
+    #Helper Functions
+    def add_rule_button(self):
+        global boxes
+        boxes = {}
+        boxes = {'chain':self.RuleChain,'protocol':self.TrafficType,'action':self.Action,'source':self.SrcIP,'src_port':self.SrcPort,'destination':self.DstIP,'dst_port':self.DstPort}
+        rule_table.append(boxes)
+
 
 if __name__ == "__main__":
     import sys
