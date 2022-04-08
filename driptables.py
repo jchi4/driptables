@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QMessageBox
 import subprocess
 import os
 rule_table = []
@@ -48,6 +49,8 @@ class Ui_MainWindow(object):
         self.Reset = QtWidgets.QPushButton(self.centralwidget)
         self.Reset.setGeometry(QtCore.QRect(1220, 260, 87, 27))
         self.Reset.setObjectName("Reset")
+        #added functionality to when the Reset button is clicked
+        #self.Reset.clicked.connect(self.reset_button) #calls the reset_button function
         self.SrcIP = QtWidgets.QTextEdit(self.centralwidget)
         self.SrcIP.setGeometry(QtCore.QRect(550, 250, 211, 61))
         self.SrcIP.setLayoutDirection(QtCore.Qt.LeftToRight)
@@ -80,6 +83,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        self.Reset.clicked.connect(self.show_popup)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -116,10 +120,10 @@ class Ui_MainWindow(object):
     #function to append rule to the actual iptable in Linux
     def add_rule_button(self):
         global boxes
+        flag = True
         boxes = {}
         boxes = {'chain':self.RuleChain,'protocol':self.TrafficType,'action':self.Action,'source':self.SrcIP,'src_port':self.SrcPort,'destination':self.DstIP,'dst_port':self.DstPort}
         rule_table.append(boxes)
-
         #resetting the rules and each instance for new iptable rules
         rules = {} #dictionary to store string representation value from what is in memory in variable boxes
 
@@ -129,27 +133,74 @@ class Ui_MainWindow(object):
 
         #TCP, UDP, IP, ICMP
         rules['protocol'] = boxes['protocol'].currentText()
+        if rules['protocol'] == "ICMP" or "IP":
+            flag = False
 
         #Accept, Drop, Reject
         rules['action'] = boxes['action'].currentText()
 
         #Source IP Address
         rules['source'] = boxes['source'].toPlainText()
+        if rules['source'] != '':
+            rules['source'] = '--src ' + rules['source']
+        else:
+            rules['source'] = ''
 
         #Source Port Number
         rules['src_port'] = boxes['src_port'].toPlainText()
+        if flag:
+            if rules['src_port'] != '':
+                rules['src_port'] = '--sport ' + rules['src_port']
+            else:
+                rules['src_port'] = ''
+        else:
+            rules['destination'] = ''
 
         #Destination IP Address
         rules['destination'] = boxes['destination'].toPlainText()
+        if rules['destination'] != '':
+            rules['destination'] = '--dst ' + rules['destination']
+        else:
+            rules['destination'] = ''
 
         #Destination Port Number
         rules['dst_port'] = boxes['dst_port'].toPlainText()
+        if flag:
+            if rules['dst_port'] != '':
+                rules['dst_port'] = '--dst_port ' + rules['dst_port']
+            else:
+                rules['dst_port'] = ''
+        else:
+            rules['destination'] = ''
 
         #print(rules) - Rule testing
-        commandline = subprocess.Popen([f"sudo iptables --append {rules['chain']} --protocol {rules['protocol']} --jump {rules['action']} --src {rules['source']} --sport {rules['src_port']} --dst {rules['destination']} --dport {rules['dst_port']}"], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+        commandline = subprocess.Popen([f"sudo iptables --append {rules['chain']} --protocol {rules['protocol']} --jump {rules['action']} {rules['source']} {rules['src_port']} {rules['destination']} {rules['dst_port']}"], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
         #Testing the append rule button
-        #print(f"sudo iptables --append {boxes['chain'].currentText()} --protocol {boxes['protocol']} --jump {boxes['action']} --src {boxes['source']} --sport {boxes['src_port']} --dst {boxes['destination']} --dport {boxes['dst_port']}")
+        print(f"sudo iptables --append {rules['chain']} --protocol {rules['protocol']} --jump {rules['action']} {rules['source']} {rules['src_port']} {rules['destination']} {rules['dst_port']}")
+        print(rules['source'])
+        print(rules['src_port'])
+        print(rules['destination'])
+        print(rules['dst_port'])
         output, stderr_output = commandline.communicate()
+
+    #popup box for confirmation of flushing the tables, Yes or Cancel
+    def show_popup(self):
+        msg = QMessageBox()
+        msg.setWindowTitle("Reset iptables")
+        msg.setText("Do you want to reset all iptable rules?")
+        #msg.setIcon(QMessageBox.Question)
+        msg.setStandardButtons(QMessageBox.Yes|QMessageBox.Cancel) #two buttons, Yes and Cancel
+        msg.setDefaultButton(QMessageBox.Cancel) #setting default button to be cancel for user accessibility to not by mistake flush tables
+        msg.buttonClicked.connect(self.reset) #will activate upon clicking any of the buttons
+        x = msg.exec_()
+
+    #reset function called by show_popup button selection
+    def reset(self, whichButton):
+        if whichButton.text() == "&Yes": #if the yes button is clicked, then do the following commands to flush the tables
+            reset = subprocess.Popen([f"sudo iptables -F"], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+            output, stderr_output = reset.communicate()
+        else:
+            pass #do nothing and just exit
 
 if __name__ == "__main__":
     import sys
