@@ -84,6 +84,21 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
         self.Reset.clicked.connect(self.show_popup)
+        self.TrafficType.currentIndexChanged.connect(self.disable_box)
+        self.SrcPort.setEnabled(False)
+        self.DstPort.setEnabled(False)
+
+    def disable_box(self, index):
+        if index!=3 and index!=4 and index!=0:
+            self.SrcPort.setPlaceholderText("Src Port")
+            self.SrcPort.setEnabled(True)
+            self.DstPort.setPlaceholderText("Dst Port")
+            self.DstPort.setEnabled(True)
+        else:
+            self.SrcPort.setPlaceholderText("N/A")
+            self.SrcPort.setEnabled(False)
+            self.DstPort.setPlaceholderText("N/A")
+            self.DstPort.setEnabled(False)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -113,14 +128,13 @@ class Ui_MainWindow(object):
         self.AppendRule.setText(_translate("MainWindow", "Append Rule"))
         self.SrcPort.setPlaceholderText(_translate("MainWindow", "Src Port"))
         self.DstIP.setPlaceholderText(_translate("MainWindow", "Destination IP"))
-        self.DstPort.setPlaceholderText(_translate("MainWindow", "Dest IP"))
+        self.DstPort.setPlaceholderText(_translate("MainWindow", "Dst Port"))
 
     #Helper Functions
 
     #function to append rule to the actual iptable in Linux
     def add_rule_button(self):
         global boxes
-        flag = True
         boxes = {}
         boxes = {'chain':self.RuleChain,'protocol':self.TrafficType,'action':self.Action,'source':self.SrcIP,'src_port':self.SrcPort,'destination':self.DstIP,'dst_port':self.DstPort}
         rule_table.append(boxes)
@@ -133,8 +147,6 @@ class Ui_MainWindow(object):
 
         #TCP, UDP, IP, ICMP
         rules['protocol'] = boxes['protocol'].currentText()
-        if rules['protocol'] == "ICMP" or "IP":
-            flag = False
 
         #Accept, Drop, Reject
         rules['action'] = boxes['action'].currentText()
@@ -142,45 +154,36 @@ class Ui_MainWindow(object):
         #Source IP Address
         rules['source'] = boxes['source'].toPlainText()
         if rules['source'] != '':
-            rules['source'] = '--src ' + rules['source']
+            rules['source'] = ' --src ' + rules['source']
         else:
             rules['source'] = ''
 
         #Source Port Number
         rules['src_port'] = boxes['src_port'].toPlainText()
-        if flag:
-            if rules['src_port'] != '':
-                rules['src_port'] = '--sport ' + rules['src_port']
-            else:
-                rules['src_port'] = ''
+        if rules['src_port'] != '':
+            rules['src_port'] = ' --sport ' + rules['src_port']
         else:
-            rules['destination'] = ''
+            rules['src_port'] = ''
 
         #Destination IP Address
         rules['destination'] = boxes['destination'].toPlainText()
         if rules['destination'] != '':
-            rules['destination'] = '--dst ' + rules['destination']
+            rules['destination'] = ' --dst ' + rules['destination']
         else:
             rules['destination'] = ''
 
         #Destination Port Number
         rules['dst_port'] = boxes['dst_port'].toPlainText()
-        if flag:
-            if rules['dst_port'] != '':
-                rules['dst_port'] = '--dst_port ' + rules['dst_port']
-            else:
-                rules['dst_port'] = ''
+        if rules['dst_port'] != '':
+            rules['dst_port'] = ' --dport ' + rules['dst_port']
         else:
-            rules['destination'] = ''
+            rules['dst_port'] = ''
 
-        #print(rules) - Rule testing
-        commandline = subprocess.Popen([f"sudo iptables --append {rules['chain']} --protocol {rules['protocol']} --jump {rules['action']} {rules['source']} {rules['src_port']} {rules['destination']} {rules['dst_port']}"], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
+        #way to concatenate the source, src_port, destination, dst_port so that there will be no additional spaces when running command
+        remainder_rule = rules['source'] + rules['src_port'] + rules['destination'] + rules['dst_port']
+        print(f"sudo iptables --append {rules['chain']} --protocol {rules['protocol']} --jump {rules['action']}{remainder_rule}")
         #Testing the append rule button
-        print(f"sudo iptables --append {rules['chain']} --protocol {rules['protocol']} --jump {rules['action']} {rules['source']} {rules['src_port']} {rules['destination']} {rules['dst_port']}")
-        print(rules['source'])
-        print(rules['src_port'])
-        print(rules['destination'])
-        print(rules['dst_port'])
+        commandline = subprocess.Popen([f"sudo iptables --append {rules['chain']} --protocol {rules['protocol']} --jump {rules['action']}{remainder_rule}"], stderr=subprocess.STDOUT, stdout=subprocess.PIPE, shell=True)
         output, stderr_output = commandline.communicate()
 
     #popup box for confirmation of flushing the tables, Yes or Cancel
