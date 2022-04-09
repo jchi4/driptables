@@ -206,8 +206,6 @@ class Ui_MainWindow(object):
         self.TrafficType.currentIndexChanged.connect(self.disable_box) #calls disable_box when "Traffic Type" dropdown value changes. Checks for ICMP/IP
 
         #set buttons state
-        self.SrcPort.setEnabled(False) #set SrcPort uneditable for beginning
-        self.DstPort.setEnabled(False) #set DstPort uneditable for beginning
         self.AddRule.setEnabled(False) #set "Add Rule" button unclickable for beginning
         self.UpdateRule.setEnabled(False) #set "Update Rule" button unclickable for beginning
 
@@ -280,7 +278,7 @@ class Ui_MainWindow(object):
 
     #Disable text box if select ICMP or IP as "Traffic Type"
     def disable_box(self, index):
-        if index!=3 and index!=4 and index!=0: #If TCP or UDP, enable edit
+        if index!=3 and index!=4: #If TCP or UDP, enable edit
             self.SrcPort.setPlaceholderText("Src Port")
             self.SrcPort.setEnabled(True)
             self.DstPort.setPlaceholderText("Dst Port")
