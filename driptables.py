@@ -5,6 +5,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QMessageBox
 import subprocess
 import os
+import re
 rule_table = []
 
 class Ui_MainWindow(object):
@@ -285,6 +286,8 @@ class Ui_MainWindow(object):
             self.DstPort.setPlaceholderText("Dst Port")
             self.DstPort.setEnabled(True)
         else: #Otherwise disable edit for ICMP and IP
+            self.SrcPort.setPlainText('')
+            self.DstPort.setPlainText('')
             self.SrcPort.setPlaceholderText("N/A")
             self.SrcPort.setEnabled(False)
             self.DstPort.setPlaceholderText("N/A")
@@ -292,6 +295,8 @@ class Ui_MainWindow(object):
 
     #Add rule to the actual iptable in Linux
     def add_rule_button(self):
+        ip_regex = "^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])$" #regular expression for IPv4 address
+        rule_flag = True #for checking if IP validation check passes
         boxes = {} #dictionary to store values from boxes
         boxes = {'chain':self.RuleChain,'protocol':self.TrafficType,'action':self.Action,'source':self.SrcIP,'src_port':self.SrcPort,'destination':self.DstIP,'dst_port':self.DstPort}
         rule_table.append(boxes)
@@ -305,22 +310,76 @@ class Ui_MainWindow(object):
         rules['destination'] = boxes['destination'].toPlainText() #Destination IP Address
         rules['dst_port'] = boxes['dst_port'].toPlainText() #Destination Port Number
 
-        #Concatenate source, src_port, destination, dst_port to remove spaces when formatting bash command
-        if rules['source'] != '':
-            rules['source'] = ' --src ' + rules['source']
-        if rules['src_port'] != '':
-            rules['src_port'] = ' --sport ' + rules['src_port']
-        if rules['destination'] != '':
-            rules['destination'] = ' --dst ' + rules['destination']
-        if rules['dst_port'] != '':
-            rules['dst_port'] = ' --dport ' + rules['dst_port']
-        remainder_rule = rules['source'] + rules['src_port'] + rules['destination'] + rules['dst_port']
+        #Check if Source IP/Destination IP addresses is valid:
+        if rules['source'] != '' and rules['destination'] != '': #if both boxes have fields
+            if (re.search(ip_regex, rules['source']) and re.search(ip_regex, rules['destination'])): #if both valid
+                pass
+            else:
+                rule_flag = False
+                msg = QMessageBox()
+                msg.setWindowTitle("Error, Try Again!")
+                msg.setText("Source IP and Destination IP Address is Invalid.")
+                #msg.setIcon(QMessageBox.Question)
+                x = msg.exec_()
+        elif rules['source'] != '': #if source IP has fields
+            if (re.search(ip_regex, rules['source'])): #source IP is valid
+                pass
+            else:
+                rule_flag = False
+                msg = QMessageBox()
+                msg.setWindowTitle("Error, Try Again!")
+                msg.setText("Source IP Address is Invalid.")
+                #msg.setIcon(QMessageBox.Question)
+                x = msg.exec_()
+        elif rules['destination'] != '': #if destination IP has fields
+            if (re.search(ip_regex, rules['destination'])): #destination IP is valid
+                pass
+            else:
+                rule_flag = False
+                msg = QMessageBox()
+                msg.setWindowTitle("Error, Try Again!")
+                msg.setText("Destination IP Address is Invalid.")
+                #msg.setIcon(QMessageBox.Question)
+                x = msg.exec_()
 
-        #print to see output format on commandline
-        print(f"sudo iptables --append {rules['chain']} --protocol {rules['protocol']} --jump {rules['action']}{remainder_rule}")
-        #Run bash command to add to Linux iptables, command is built from dictionary variable values
-        commandline = subprocess.Popen([f"sudo iptables --append {rules['chain']} --protocol {rules['protocol']} --jump {rules['action']}{remainder_rule}"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-        output, stderr_output = commandline.communicate()
+        #Check if Ports are Valid
+        try: #if "Src Port" and "Dst Port" is valid
+            if rules['src_port'] != '':
+                if 1 <= int(rules['src_port']) <= 65535:
+                    pass
+                else:
+                    raise ValueError
+            if rules['dst_port'] != '':
+                if 1 <= int(rules['dst_port']) <= 65535:
+                    pass
+                else:
+                    raise ValueError
+        except ValueError: #catch the invalid and show popup about the error
+            rule_flag = False
+            msg = QMessageBox()
+            msg.setWindowTitle("Error, Try Again!")
+            msg.setText("Invalid Port Number, must be between 1 and 65535.")
+            #msg.setIcon(QMessageBox.Question)
+            x = msg.exec_()
+
+        #If the IP check passes, add rule to iptables (Default True, if fails check set to False)
+        if rule_flag:
+        #Concatenate source, src_port, destination, dst_port to remove spaces when formatting bash command
+            if rules['source'] != '':
+                rules['source'] = ' --src ' + rules['source']
+            if rules['src_port'] != '':
+                rules['src_port'] = ' --sport ' + rules['src_port']
+            if rules['destination'] != '':
+                rules['destination'] = ' --dst ' + rules['destination']
+            if rules['dst_port'] != '':
+                rules['dst_port'] = ' --dport ' + rules['dst_port']
+            remainder_rule = rules['source'] + rules['src_port'] + rules['destination'] + rules['dst_port']
+
+            #print to see output format on commandline
+            print(f"sudo iptables --append {rules['chain']} --protocol {rules['protocol']} --jump {rules['action']}{remainder_rule}")
+            #Run bash command to add to Linux iptables, command is built from dictionary variable values
+            commandline = subprocess.Popen([f"sudo iptables --append {rules['chain']} --protocol {rules['protocol']} --jump {rules['action']}{remainder_rule}"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+            output, stderr_output = commandline.communicate()
 
     #Confirmation popup box to flushing the tables. Options: "Yes" or "Cancel"
     def show_popup(self):
@@ -339,7 +398,7 @@ class Ui_MainWindow(object):
             reset = subprocess.Popen([f"sudo iptables -F"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
             output, stderr_output = reset.communicate()
         else:
-            pass #Otherwise nothing
+            pass #Clicked Cancel, do nothing and exit
 
     #Clear all textbox and dropdown box to be empty
     def clear_text(self):
