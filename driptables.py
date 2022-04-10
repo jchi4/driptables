@@ -270,11 +270,15 @@ class Ui_MainWindow(object):
 ### HELPER FUNCTIONS ###
     #Autocomplete option for when need to access previous inputted IP address, called by add_rule_button after validation check
     def autocomplete(self, srcIP, dstIP, srcPort, dstPort):
-        #append valid inputs to respective lists
-        src_ip.append(srcIP)
-        dst_ip.append(dstIP)
-        src_port.append(srcPort)
-        dst_port.append(dstPort)
+        #append valid inputs to respective lists, only if it is a unique entry
+        if srcIP not in src_ip:
+            src_ip.append(srcIP)
+        if dstIP not in dst_ip:
+            dst_ip.append(dstIP)
+        if srcPort not in src_port:
+            src_port.append(srcPort)
+        if dstPort not in dst_port:
+            dst_port.append(dstPort)
         #grab all items from lists and convert to Qcompleter type
         src_ip_com = QtWidgets.QCompleter(src_ip)
         dst_ip_com = QtWidgets.QCompleter(dst_ip)
@@ -288,9 +292,13 @@ class Ui_MainWindow(object):
 
     #Iptables Rule List, is called and then updates the table to have latest entry of the iptable on Linux machine
     def view_rule(self):
-        view_all = subprocess.Popen(["sudo iptables -L"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True) #storing bash command to a variable "view_all"
+        view_all = subprocess.Popen(["sudo iptables -L -n --line-numbers"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True) #storing bash command to a variable "view_all"
         current, stderr_current = view_all.communicate() #stderr_current is holding metadata unimportant whereas current holds value of output from command
-        self.showL.setText(current.decode("utf-8")) #data type is "bytes" so needs to use decode to transfer to type "string"
+        current = current.decode("utf-8") #data type is "bytes" so needs to use decode to transfer to type "string"
+        self.showL.setText(current)
+        self.showL.selectAll() #selecting all plaintext
+        self.showL.setAlignment(QtCore.Qt.AlignCenter) #centering all text selected in previous statement
+
 
     #Will enable "Add Rule" button if dropdown box have changed from index 0 (placeholder values)
     def check_rule(self):
