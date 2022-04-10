@@ -4,7 +4,11 @@
 import subprocess,re,sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
-
+#global variables so that when autocomplete function is called does not reset containers
+src_ip = []
+dst_ip = []
+src_port = []
+dst_port = []
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -264,6 +268,24 @@ class Ui_MainWindow(object):
         self.SrcIP.setPlaceholderText(_translate("MainWindow", "Source IP"))
 
 ### HELPER FUNCTIONS ###
+    #Autocomplete option for when need to access previous inputted IP address, called by add_rule_button after validation check
+    def autocomplete(self, srcIP, dstIP, srcPort, dstPort):
+        #append valid inputs to respective lists
+        src_ip.append(srcIP)
+        dst_ip.append(dstIP)
+        src_port.append(srcPort)
+        dst_port.append(dstPort)
+        #grab all items from lists and convert to Qcompleter type
+        src_ip_com = QtWidgets.QCompleter(src_ip)
+        dst_ip_com = QtWidgets.QCompleter(dst_ip)
+        src_port_com = QtWidgets.QCompleter(src_port)
+        dst_port_com = QtWidgets.QCompleter(dst_port)
+        #set autocomplete options taken from conversion of _com for respective lineEdit boxes
+        self.SrcIP.setCompleter(src_ip_com)
+        self.DstIP.setCompleter(dst_ip_com)
+        self.SrcPort.setCompleter(src_port_com)
+        self.DstPort.setCompleter(dst_port_com)
+
     #Iptables Rule List, is called and then updates the table to have latest entry of the iptable on Linux machine
     def view_rule(self):
         view_all = subprocess.Popen(["sudo iptables -L"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True) #storing bash command to a variable "view_all"
@@ -287,8 +309,8 @@ class Ui_MainWindow(object):
             self.DstPort.setPlaceholderText("Dst Port")
             self.DstPort.setEnabled(True)
         else: #Otherwise disable edit for ICMP and IP
-            self.SrcPort.setPlainText('') #clear SrcPort field, else data still transparent
-            self.DstPort.setPlainText('') #clear DstPort field, else data still transparent
+            self.SrcPort.setText('') #clear SrcPort field, else data still transparent
+            self.DstPort.setText('') #clear DstPort field, else data still transparent
             self.SrcPort.setPlaceholderText("N/A")
             self.SrcPort.setEnabled(False)
             self.DstPort.setPlaceholderText("N/A")
@@ -362,8 +384,9 @@ class Ui_MainWindow(object):
             msg.setIcon(QMessageBox.Critical)
             msg.exec_()
 
-        #If the IP check passes, add rule to iptables (Default True, if fails check set to False)
+        #If the IP check passes, add rule to iptables (Default = True, if fails validation check set to False)
         if rule_flag:
+            self.autocomplete(rules['source'],rules['destination'],rules['src_port'],rules['dst_port']) #sending valid inputs to autocomplete to be saved
         #Concatenate source, src_port, destination, dst_port to remove spaces when formatting bash command
             if rules['source'] != '':
                 rules['source'] = ' --src ' + rules['source']
