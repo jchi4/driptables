@@ -1,25 +1,12 @@
 #!/usr/bin/env python3
 
 ### IMPORT STATEMENTS ###
+import subprocess,re,sys
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QMessageBox
-import subprocess
-import os
-import re
-rule_table = []
+from PyQt5.QtWidgets import QMessageBox
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
-        #global variables to grab value for iptable command
-        global RuleChain
-        global TrafficType
-        global Action
-        global SrcIP
-        global SrcPort
-        global DstIP
-        global DstPort
-        global boxes #dictionary for add_rule function
-        #GUI skeleton code
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1407, 966)
         MainWindow.setStyleSheet("font: 13pt \"Roboto Slab\";\n""")
@@ -95,7 +82,7 @@ class Ui_MainWindow(object):
         font.setWeight(50)
         self.AddRule.setFont(font)
         self.AddRule.setObjectName("AddRule")
-        self.SrcPort = QtWidgets.QTextEdit(self.centralwidget)
+        self.SrcPort = QtWidgets.QLineEdit(self.centralwidget)
         self.SrcPort.setGeometry(QtCore.QRect(810, 620, 81, 61))
         font = QtGui.QFont()
         font.setFamily("Roboto Slab")
@@ -105,7 +92,7 @@ class Ui_MainWindow(object):
         font.setWeight(50)
         self.SrcPort.setFont(font)
         self.SrcPort.setObjectName("SrcPort")
-        self.DstIP = QtWidgets.QTextEdit(self.centralwidget)
+        self.DstIP = QtWidgets.QLineEdit(self.centralwidget)
         self.DstIP.setGeometry(QtCore.QRect(910, 620, 211, 61))
         font = QtGui.QFont()
         font.setFamily("Roboto Slab")
@@ -115,7 +102,7 @@ class Ui_MainWindow(object):
         font.setWeight(50)
         self.DstIP.setFont(font)
         self.DstIP.setObjectName("DstIP")
-        self.DstPort = QtWidgets.QTextEdit(self.centralwidget)
+        self.DstPort = QtWidgets.QLineEdit(self.centralwidget)
         self.DstPort.setGeometry(QtCore.QRect(1140, 620, 81, 61))
         font = QtGui.QFont()
         font.setFamily("Roboto Slab")
@@ -156,6 +143,9 @@ class Ui_MainWindow(object):
         self.label = QtWidgets.QLabel(self.RuleArea)
         self.label.setGeometry(QtCore.QRect(610, 0, 111, 19))
         self.label.setObjectName("label")
+        self.showL = QtWidgets.QTextBrowser(self.RuleArea)
+        self.showL.setObjectName("showL")
+        self.showL.setGeometry(QtCore.QRect(20, 30, 1331, 531))
         self.RuleView.setWidget(self.RuleArea)
         self.SourceLabel = QtWidgets.QLabel(self.centralwidget)
         self.SourceLabel.setGeometry(QtCore.QRect(650, 600, 81, 19))
@@ -178,7 +168,7 @@ class Ui_MainWindow(object):
         self.RuleChainLabel = QtWidgets.QLabel(self.centralwidget)
         self.RuleChainLabel.setGeometry(QtCore.QRect(100, 600, 91, 19))
         self.RuleChainLabel.setObjectName("RuleChainLabel")
-        self.SrcIP = QtWidgets.QTextEdit(self.centralwidget)
+        self.SrcIP = QtWidgets.QLineEdit(self.centralwidget)
         self.SrcIP.setGeometry(QtCore.QRect(580, 620, 211, 61))
         font = QtGui.QFont()
         font.setFamily("Roboto Slab")
@@ -201,6 +191,7 @@ class Ui_MainWindow(object):
 
         #When a button is clicked (fuction calls)
         self.AddRule.clicked.connect(self.add_rule_button) #calls add_rule_button function when clicked. (Adds rule)
+        self.AddRule.clicked.connect(self.view_rule) #calls view_rule function when clicked. (Updates iptable table on screen)
         self.Reset.clicked.connect(self.show_popup) #calls show_popup function when clicked. (Confirmation screen)
         self.Clear.clicked.connect(self.clear_text) #calls clear_text when clicked. (Clear box text)
         self.TrafficType.currentIndexChanged.connect(self.disable_box) #calls disable_box when "Traffic Type" dropdown value changes. Checks for ICMP/IP
@@ -230,9 +221,18 @@ class Ui_MainWindow(object):
         self.DstIP.textChanged.connect(self.hidden_label)
         self.DstPort.textChanged.connect(self.hidden_label)
 
+        #View iptable rules on screen via GUI, initially running "sudo iptables -L" by calling function "view_rule"
+        self.view_rule()
+
+        #Set Character Limit, 15 for IP including '.' and 5 for Port since 65535
+        self.SrcIP.setMaxLength(15)
+        self.SrcPort.setMaxLength(5)
+        self.DstIP.setMaxLength(15)
+        self.DstPort.setMaxLength(5)
+
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "iptables"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "driptables"))
         self.RuleChain.setItemText(1, _translate("MainWindow", "INPUT"))
         self.RuleChain.setItemText(2, _translate("MainWindow", "FORWARD"))
         self.RuleChain.setItemText(3, _translate("MainWindow", "OUTPUT"))
@@ -264,8 +264,11 @@ class Ui_MainWindow(object):
         self.SrcIP.setPlaceholderText(_translate("MainWindow", "Source IP"))
 
 ### HELPER FUNCTIONS ###
-    def view_rule(self): #implement later
-        pass
+    #Iptables Rule List, is called and then updates the table to have latest entry of the iptable on Linux machine
+    def view_rule(self):
+        view_all = subprocess.Popen(["sudo iptables -L"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True) #storing bash command to a variable "view_all"
+        current, stderr_current = view_all.communicate() #stderr_current is holding metadata unimportant whereas current holds value of output from command
+        self.showL.setText(current.decode("utf-8")) #data type is "bytes" so needs to use decode to transfer to type "string"
 
     #Will enable "Add Rule" button if dropdown box have changed from index 0 (placeholder values)
     def check_rule(self):
@@ -284,8 +287,8 @@ class Ui_MainWindow(object):
             self.DstPort.setPlaceholderText("Dst Port")
             self.DstPort.setEnabled(True)
         else: #Otherwise disable edit for ICMP and IP
-            self.SrcPort.setPlainText('')
-            self.DstPort.setPlainText('')
+            self.SrcPort.setPlainText('') #clear SrcPort field, else data still transparent
+            self.DstPort.setPlainText('') #clear DstPort field, else data still transparent
             self.SrcPort.setPlaceholderText("N/A")
             self.SrcPort.setEnabled(False)
             self.DstPort.setPlaceholderText("N/A")
@@ -297,28 +300,27 @@ class Ui_MainWindow(object):
         rule_flag = True #for checking if IP validation check passes
         boxes = {} #dictionary to store values from boxes
         boxes = {'chain':self.RuleChain,'protocol':self.TrafficType,'action':self.Action,'source':self.SrcIP,'src_port':self.SrcPort,'destination':self.DstIP,'dst_port':self.DstPort}
-        rule_table.append(boxes)
         #Reset rules for each instance. New iptable rule
         rules = {} #dictionary to store string representation value from variable "boxes" by toPlainText conversion, below is the conversion
         rules['chain'] = boxes['chain'].currentText() #Input, Forward, Output, Prerouting
         rules['protocol'] = boxes['protocol'].currentText() #TCP, UDP, IP, ICMP
         rules['action'] = boxes['action'].currentText() #Accept, Drop, Reject
-        rules['source'] = boxes['source'].toPlainText() #Source IP Address
-        rules['src_port'] = boxes['src_port'].toPlainText() #Source Port Number
-        rules['destination'] = boxes['destination'].toPlainText() #Destination IP Address
-        rules['dst_port'] = boxes['dst_port'].toPlainText() #Destination Port Number
+        rules['source'] = boxes['source'].text() #Source IP Address
+        rules['src_port'] = boxes['src_port'].text() #Source Port Number
+        rules['destination'] = boxes['destination'].text() #Destination IP Address
+        rules['dst_port'] = boxes['dst_port'].text() #Destination Port Number
 
         #Check if Source IP/Destination IP addresses is valid:
         if rules['source'] != '' and rules['destination'] != '': #if both boxes have fields
-            if (re.search(ip_regex, rules['source']) and re.search(ip_regex, rules['destination'])): #if both valid
+            if (re.search(ip_regex, rules['source']) and re.search(ip_regex, rules['destination'])): #if both valid via comparison
                 pass
             else:
                 rule_flag = False
                 msg = QMessageBox()
                 msg.setWindowTitle("Error, Try Again!")
-                msg.setText("Source IP and Destination IP Address is Invalid.")
-                #msg.setIcon(QMessageBox.Question)
-                x = msg.exec_()
+                msg.setText("Source IP and Destination IP Address are Invalid.")
+                msg.setIcon(QMessageBox.Critical)
+                msg.exec_()
         elif rules['source'] != '': #if source IP has fields
             if (re.search(ip_regex, rules['source'])): #source IP is valid
                 pass
@@ -327,8 +329,8 @@ class Ui_MainWindow(object):
                 msg = QMessageBox()
                 msg.setWindowTitle("Error, Try Again!")
                 msg.setText("Source IP Address is Invalid.")
-                #msg.setIcon(QMessageBox.Question)
-                x = msg.exec_()
+                msg.setIcon(QMessageBox.Critical)
+                msg.exec_()
         elif rules['destination'] != '': #if destination IP has fields
             if (re.search(ip_regex, rules['destination'])): #destination IP is valid
                 pass
@@ -337,8 +339,8 @@ class Ui_MainWindow(object):
                 msg = QMessageBox()
                 msg.setWindowTitle("Error, Try Again!")
                 msg.setText("Destination IP Address is Invalid.")
-                #msg.setIcon(QMessageBox.Question)
-                x = msg.exec_()
+                msg.setIcon(QMessageBox.Critical)
+                msg.exec_()
 
         #Check if Ports are Valid
         try: #if "Src Port" and "Dst Port" is valid
@@ -357,8 +359,8 @@ class Ui_MainWindow(object):
             msg = QMessageBox()
             msg.setWindowTitle("Error, Try Again!")
             msg.setText("Invalid Port Number, must be between 1 and 65535.")
-            #msg.setIcon(QMessageBox.Question)
-            x = msg.exec_()
+            msg.setIcon(QMessageBox.Critical)
+            msg.exec_()
 
         #If the IP check passes, add rule to iptables (Default True, if fails check set to False)
         if rule_flag:
@@ -384,17 +386,18 @@ class Ui_MainWindow(object):
         msg = QMessageBox()
         msg.setWindowTitle("Flush iptables")
         msg.setText("Reset all iptable rules?")
-        #msg.setIcon(QMessageBox.Question)
+        msg.setIcon(QMessageBox.Warning)
         msg.setStandardButtons(QMessageBox.Yes|QMessageBox.Cancel) #Two buttons, "Yes" or "Cancel"
         msg.setDefaultButton(QMessageBox.Cancel) #Default button = "Cancel" for clarity, in case mistakenly flush iptables
         msg.buttonClicked.connect(self.reset) #Activate from click on any button, calls reset function below
-        x = msg.exec_() #Popup box appear on screen
+        msg.exec_() #Popup box appear on screen
 
     #Reset function after show_popup check
     def reset(self, whichButton):
         if whichButton.text() == "&Yes": #if "Yes" button clicked, flush the tables via bash command
             reset = subprocess.Popen([f"sudo iptables -F"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
             output, stderr_output = reset.communicate()
+            self.view_rule() #calls the function to update with empty table
         else:
             pass #Clicked Cancel, do nothing and exit
 
@@ -403,10 +406,10 @@ class Ui_MainWindow(object):
         self.RuleChain.setCurrentIndex(0)
         self.TrafficType.setCurrentIndex(0)
         self.Action.setCurrentIndex(0)
-        self.SrcIP.setPlainText('')
-        self.SrcPort.setPlainText('')
-        self.DstIP.setPlainText('')
-        self.DstPort.setPlainText('')
+        self.SrcIP.setText('')
+        self.SrcPort.setText('')
+        self.DstIP.setText('')
+        self.DstPort.setText('')
         self.SrcPort.setPlaceholderText("Src Port")
         self.DstPort.setPlaceholderText("Dst Port")
 
@@ -424,26 +427,25 @@ class Ui_MainWindow(object):
             self.TrafficeTypeLabel.setHidden(False)
         else:
             self.TrafficeTypeLabel.setHidden(True)
-        if self.SrcIP.toPlainText() != "":
+        if self.SrcIP.text() != "":
             self.SourceLabel.setHidden(False)
         else:
             self.SourceLabel.setHidden(True)
-        if self.SrcPort.toPlainText() != "":
+        if self.SrcPort.text() != "":
             self.SrcPortLabel.setHidden(False)
         else:
             self.SrcPortLabel.setHidden(True)
-        if self.DstIP.toPlainText() != "":
+        if self.DstIP.text() != "":
             self.DestinationLabel.setHidden(False)
         else:
             self.DestinationLabel.setHidden(True)
-        if self.DstPort.toPlainText() != "":
+        if self.DstPort.text() != "":
             self.DestPortLabel.setHidden(False)
         else:
             self.DestPortLabel.setHidden(True)
 
 ### DUNDER CHECK ###
 if __name__ == "__main__":
-    import sys
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
