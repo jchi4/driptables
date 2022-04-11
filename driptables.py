@@ -401,7 +401,8 @@ class Ui_MainWindow(object):
             #sending here because otherwise the rule does not exists in the table
             self.fill_data(update['chain'], num, action, protocol, srcIP, dstIP, spt, dpt) #sending the data over to another function after parsing
         else:
-            print('Error') #popup box later implement saying that the num and chain doesn't exists
+            if int(update['num']) == 0 or output == []:
+                self.num_error_popup()
 
     #filling in the data grabbed from confirm_button to populate the boxes for ease of access when updating a rule that already exists
     def fill_data(self, chain, num, action, protocol, srcIP, dstIP, spt, dpt):
@@ -542,15 +543,22 @@ class Ui_MainWindow(object):
         removal = {} #dictionary, below is saving the value as a string type to concatenate
         removal['num'] = str(self.spinBox_Remove.value())
         removal['chain'] = self.RuleChain_Remove.currentText()
-
-        #*** Need a validation method to find out if a rule is existent, implement later ***
-
         #print to see output format on commandline
         print(f"sudo iptables -D {removal['chain']} {removal['num']}")
         #Run bash command to remove rule from Linux iptables, command is built from dictionary variable values
         commandline = subprocess.Popen([f"sudo iptables -D {removal['chain']} {removal['num']}"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
         output, stderr_output = commandline.communicate()
         self.view_rule() #calls view_rule function after removing rule (Updates iptable table on screen after deletion)
+        #toss error for nonexistent num and chain combination
+        if int(removal['num']) == 0 or 'Index' in output.decode("utf-8"):
+            self.num_error_popup()
+
+    def num_error_popup(self):
+        msg = QMessageBox()
+        msg.setWindowTitle("Invalid Num/Chain combination!")
+        msg.setText("Must be an existing rule.")
+        msg.setIcon(QMessageBox.Critical)
+        msg.exec_()
 
     #Add rule to the actual iptable in Linux
     def add_rule_button(self):
