@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 ### IMPORT STATEMENTS ###
+from genericpath import exists
 import subprocess,re,sys
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 #global variables so that when autocomplete function is called does not reset containers
@@ -33,7 +33,6 @@ class Ui_MainWindow(object):
         self.RuleChain.setObjectName("RuleChain")
         self.RuleChain.addItem("")
         self.RuleChain.setItemText(0, "Rule Chain")
-        self.RuleChain.addItem("")
         self.RuleChain.addItem("")
         self.RuleChain.addItem("")
         self.RuleChain.addItem("")
@@ -109,6 +108,17 @@ class Ui_MainWindow(object):
         font.setWeight(50)
         self.UpdateRule.setFont(font)
         self.UpdateRule.setObjectName("UpdateRule")
+        #another button for Update Confirmation, choosing which rule and chain
+        self.UpdateConfirm = QtWidgets.QPushButton(self.centralwidget)
+        self.UpdateConfirm.setGeometry(QtCore.QRect(590, 720, 201, 91))
+        font = QtGui.QFont()
+        font.setFamily("Roboto Slab")
+        font.setPointSize(13)
+        font.setBold(False)
+        font.setItalic(False)
+        font.setWeight(50)
+        self.UpdateConfirm.setFont(font)
+        self.UpdateConfirm.setObjectName("UpdateConfirm")
         self.RuleView = QtWidgets.QScrollArea(self.centralwidget)
         self.RuleView.setGeometry(QtCore.QRect(10, 10, 1381, 581))
         self.RuleView.setStyleSheet("background-color: rgb(61, 56, 70);")
@@ -193,7 +203,6 @@ class Ui_MainWindow(object):
         self.RuleChain_Remove.addItem("")
         self.RuleChain_Remove.addItem("")
         self.RuleChain_Remove.addItem("")
-        self.RuleChain_Remove.addItem("")
         self.Num_Remove = QtWidgets.QLabel(self.centralwidget)
         self.Num_Remove.setGeometry(QtCore.QRect(340, 720, 41, 19))
         self.Num_Remove.setObjectName("Num_Remove")
@@ -239,19 +248,26 @@ class Ui_MainWindow(object):
         #When a button is clicked (fuction calls)
         self.AddRule.clicked.connect(self.add_rule_button) #calls add_rule_button function when clicked. (Adds rule)
         self.RemoveRule.clicked.connect(self.remove_rule_button) #call remove_rule_button when clicked. (Removes rule)
+        self.UpdateConfirm.clicked.connect(self.confirm_button) #call confirm_button when clicked. (Grabs data for confirmation of replacement/update)
+        self.UpdateRule.clicked.connect(self.update_rule_button) #call update_rule_button when clicked. (Updates rule)
         self.Reset.clicked.connect(self.show_popup) #calls show_popup function when clicked. (Confirmation screen)
         self.Clear.clicked.connect(self.clear_text) #calls clear_text when clicked. (Clear box text)
         self.TrafficType.currentIndexChanged.connect(self.disable_box) #calls disable_box when "Traffic Type" dropdown value changes. Checks for ICMP/IP
+        self.spinBox.valueChanged.connect(self.switch_name) #swaps between "Add" and "Insert" for the button name
 
         #set buttons state
         self.AddRule.setEnabled(False) #set "Add Rule" button unclickable for beginning
         self.UpdateRule.setEnabled(False) #set "Update Rule" button unclickable for beginning
         self.RemoveRule.setEnabled(False) #set "Remove Rule" button unclickable for beginning
+        self.UpdateConfirm.setEnabled(False) #set "Update Confirm" button unclickable for beginning
 
         #Calls check_rule, if "RuleChain, TrafficType, Action" are changed from index 0. Allows "Add Rule" button to be active
         self.RuleChain.currentIndexChanged.connect(self.check_rule)
         self.TrafficType.currentIndexChanged.connect(self.check_rule)
         self.Action.currentIndexChanged.connect(self.check_rule)
+        self.RuleChain.currentIndexChanged.connect(self.update_check_rule)
+        self.TrafficType.currentIndexChanged.connect(self.update_check_rule)
+        self.Action.currentIndexChanged.connect(self.update_check_rule)
 
         #Hide labels and unhide when box field has string value
         self.RuleChainLabel.setHidden(True)
@@ -280,7 +296,7 @@ class Ui_MainWindow(object):
         self.Check_Update.stateChanged.connect(self.uncheck_update) #only allows 1 check, will do tasks for "Update" mode
         self.Check_Remove.stateChanged.connect(self.uncheck_remove) #only allows 1 check, will do tasks for "Remove" mode
         self.RuleChain_Remove.currentIndexChanged.connect(self.check_remove) #if the dropdown list for the remove "Rule Chain" has changed from index 0 enable the button
-        self.RuleChain.currentIndexChanged.connect(self.check_update)
+        self.RuleChain_Remove.currentIndexChanged.connect(self.check_update)
 
         #View iptable rules on screen via GUI, initially running "sudo iptables -L" by calling function "view_rule"
         self.view_rule()
@@ -288,22 +304,22 @@ class Ui_MainWindow(object):
         #Checkbox state, set buttons for both to be hidden from beginning, only "Add Rule" by default
         self.UpdateRule.setHidden(True)
         self.RemoveRule.setHidden(True)
+        self.UpdateConfirm.setHidden(True)
 
         #Set Character Limit, 15 for IP including '.' and 5 for Port since 65535
         self.SrcIP.setMaxLength(18)
         self.SrcPort.setMaxLength(5)
         self.DstIP.setMaxLength(18)
         self.DstPort.setMaxLength(5)
-        self.spinBox.setMinimum(1)
-        self.spinBox_Remove.setMinimum(1)
+        #self.spinBox.setMinimum(1)
 
+    #Renaming the items
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "driptables"))
         self.RuleChain.setItemText(1, _translate("MainWindow", "INPUT"))
         self.RuleChain.setItemText(2, _translate("MainWindow", "FORWARD"))
         self.RuleChain.setItemText(3, _translate("MainWindow", "OUTPUT"))
-        self.RuleChain.setItemText(4, _translate("MainWindow", "PREROUTING"))
         self.TrafficType.setItemText(1, _translate("MainWindow", "TCP"))
         self.TrafficType.setItemText(2, _translate("MainWindow", "UDP"))
         self.TrafficType.setItemText(3, _translate("MainWindow", "IP"))
@@ -317,6 +333,7 @@ class Ui_MainWindow(object):
         self.AddRule.setText(_translate("MainWindow", "Add Rule"))
         self.Reset.setText(_translate("MainWindow", "Reset Rules"))
         self.UpdateRule.setText(_translate("MainWindow", "Update Rule"))
+        self.UpdateConfirm.setText(_translate("MainWindow", "Confirm"))
         self.Title.setText(_translate("MainWindow", "Current IP Tables Rules"))
         self.SourceLabel.setText(_translate("MainWindow", "Source IP"))
         self.SrcPortLabel.setText(_translate("MainWindow", "Src Port"))
@@ -333,7 +350,6 @@ class Ui_MainWindow(object):
         self.RuleChain_Remove.setItemText(1, _translate("MainWindow", "INPUT"))
         self.RuleChain_Remove.setItemText(2, _translate("MainWindow", "FORWARD"))
         self.RuleChain_Remove.setItemText(3, _translate("MainWindow", "OUTPUT"))
-        self.RuleChain_Remove.setItemText(4, _translate("MainWindow", "PREROUTING"))
         self.Num_Remove.setText(_translate("MainWindow", "Num"))
         self.RuleChainLabel_Remove.setText(_translate("MainWindow", "Rule Chain"))
         self.SrcIP.setPlaceholderText(_translate("MainWindow", "Source IP"))
@@ -346,68 +362,6 @@ class Ui_MainWindow(object):
         self.actionRestore.setText(_translate("MainWindow", "Restore"))
 
 ### HELPER FUNCTIONS ###
-    def uncheck_update(self): #call by changes to Check_Update
-        if self.Check_Update.isChecked(): #if update is checked, hide other buttons and show only "Update Rule" button
-            self.Check_Remove.setChecked(False) #unchecks the remove checkbox so no error
-            self.AddRule.setHidden(True)
-            self.RemoveRule.setHidden(True)
-            self.UpdateRule.setHidden(False)
-            self.clear_text()
-            self.disable_buttons()
-
-        else: #for when update is unchecked bring back "Add Rule"
-            self.AddRule.setHidden(False)
-            self.UpdateRule.setHidden(True)
-            self.clear_text()
-            self.enable_buttons()
-
-    def uncheck_remove(self): #call by changes to Check_Remove
-        if self.Check_Remove.isChecked(): #if remove is checked, hide other buttons and show only "Remove Rule" button
-            self.Check_Update.setChecked(False) #unchecks the update checkbox so no error
-            self.AddRule.setHidden(True)
-            self.UpdateRule.setHidden(True)
-            self.RemoveRule.setHidden(False)
-            #hiding all UI, and only show two UI boxes
-            self.clear_text() #clear text to have clean slate
-            self.hide() #calling hide function to hide all original UI
-            #unhide two UI when checked
-            self.spinBox_Remove.setHidden(False)
-            self.Num_Remove.setHidden(False)
-            self.RuleChain_Remove.setHidden(False)
-            self.RuleChainLabel_Remove.setHidden(False)
-        else: #for when remove is unchecked bring back "Add Rule"
-            self.AddRule.setHidden(False)
-            self.RemoveRule.setHidden(True)
-            #hide two UI when unchecked
-            self.spinBox_Remove.setHidden(True)
-            self.Num_Remove.setHidden(True)
-            self.RuleChain_Remove.setHidden(True)
-            self.RuleChainLabel_Remove.setHidden(True)
-            self.clear_text() #clear text to have clean slate
-            self.unhide() #calling unhide function to show all original UI
-
-    #Autocomplete option for when need to access previous inputted IP address, called by add_rule_button after validation check
-    def autocomplete(self, srcIP, dstIP, srcPort, dstPort):
-        #append valid inputs to respective lists, only if it is a unique entry
-        if srcIP not in src_ip:
-            src_ip.append(srcIP)
-        if dstIP not in dst_ip:
-            dst_ip.append(dstIP)
-        if srcPort not in src_port:
-            src_port.append(srcPort)
-        if dstPort not in dst_port:
-            dst_port.append(dstPort)
-        #grab all items from lists and convert to Qcompleter type
-        src_ip_com = QtWidgets.QCompleter(src_ip)
-        dst_ip_com = QtWidgets.QCompleter(dst_ip)
-        src_port_com = QtWidgets.QCompleter(src_port)
-        dst_port_com = QtWidgets.QCompleter(dst_port)
-        #set autocomplete options taken from conversion of _com for respective lineEdit boxes
-        self.SrcIP.setCompleter(src_ip_com)
-        self.DstIP.setCompleter(dst_ip_com)
-        self.SrcPort.setCompleter(src_port_com)
-        self.DstPort.setCompleter(dst_port_com)
-
     #Iptables Rule List, is called and then updates the table to have latest entry of the iptable on Linux machine
     def view_rule(self):
         view_all = subprocess.Popen(["sudo iptables -L -n --line-numbers"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True) #storing bash command to a variable "view_all"
@@ -417,56 +371,171 @@ class Ui_MainWindow(object):
         self.showL.selectAll() #selecting all plaintext
         self.showL.setAlignment(QtCore.Qt.AlignCenter) #centering all text selected in previous statement
 
-    #Will enable "Remove Rule" button if the "Chain Rule" (for removal) dropdown box has been changed
-    def check_remove(self):
-        if self.RuleChain_Remove.currentIndex() > 0:
-            self.RemoveRule.setEnabled(True)
+    #Confirmation button for updating 1 rule at a time in update mode state (will grab num and rule chain)
+    def confirm_button(self):
+        spt = "" #gotta assign here because if never reaches if-else will toss error
+        dpt = "" #gotta assign here because if never reaches if-else will toss error
+        update = {} #container to store the variables of spinBox and protocol type
+        update['chain'] = self.RuleChain_Remove.currentText()
+        update['num'] = str(self.spinBox_Remove.value()) #convert to str since originally is type int for concatenation
+        #process will grab the actual line from the iptable given valid (num/chain)
+        commandline = subprocess.Popen([f"sudo iptables -L {update['chain']} -n --line-numbers | grep -w ^{update['num']}"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+        output, stderr_output = commandline.communicate() #storing the output of the commandline to variable output
+        output = output.decode("utf-8") #saving the output as a string type
+        output = output.split() #List data type where: 0=num, 1=ACTION, 2=PROTOCOL, 3=opt, 4=srcIP, 5=dstIP, 6=port protocol, 7=spt, 8=dpt (7 & 8 can be interchange due to not having spt but having dpt)
+        print(output)
+        #Validation checking process for valid output given from commandline
+        if output != []: #if there is no error and selected a valid num and chain that exists proceed forward
+            num = output[0]
+            action = output[1]
+            protocol = output[2].upper() #capitalize the protocol so that it works with commands later
+            srcIP = output[4]
+            dstIP = output[5]
+            if protocol != 'ICMP' and protocol != 'ALL': #ignore spt and dpt for ICMP and IP since they don't rely on the two fields
+                if 'spt' in output[7]: #if spt is index 7 save as spt, only saves one for index 7
+                    spt = (output[7][4:])
+                elif 'dpt' in output[7]: #if dpt is index 7 save as dpt, only saves one for index 7
+                    dpt = (output[7][4:])
+                if len(output) == 9: #if spt and dpt exists, save both then
+                    dpt = output[8][4:]
+            #sending here because otherwise the rule does not exists in the table
+            self.fill_data(update['chain'], num, action, protocol, srcIP, dstIP, spt, dpt) #sending the data over to another function after parsing
         else:
-            self.RemoveRule.setEnabled(False)
+            print('Error') #popup box later implement saying that the num and chain doesn't exists
 
-    #Will enable "Update Rule" button if the "Chain Rule" dropdown box has been changed
-    def check_update(self):
-        if self.Check_Update.isChecked(): #check if Update is checked first before doing all remaining tasks
-            if self.RuleChain.currentIndex() > 0:
-                self.enable_buttons()
-                self.UpdateRule.setEnabled(True)
-                if self.RuleChain.currentText() == "INPUT":
-                    pass #parse and match from iptable correct rule to populate (Traffic Type, Action, SrcIP, SrcPort, DstIP, DstPort)
-                elif self.RuleChain.currentText() == "FORWARD":
-                    pass #parse and match from iptable correct rule to populate (Traffic Type, Action, SrcIP, SrcPort, DstIP, DstPort)
-                elif self.RuleChain.currentText() == "OUTPUT":
-                    pass #parse and match from iptable correct rule to populate (Traffic Type, Action, SrcIP, SrcPort, DstIP, DstPort)
-                else:
-                    pass
+    #filling in the data grabbed from confirm_button to populate the boxes for ease of access when updating a rule that already exists
+    def fill_data(self, chain, num, action, protocol, srcIP, dstIP, spt, dpt):
+        self.unhide() #unhide the UI that holds the original boxes where the data is being sent to and stored for process command
+        self.UpdateConfirm.setHidden(True)
+        self.spinBox_Remove.setHidden(True)
+        self.Num_Remove.setHidden(True)
+        self.RuleChain_Remove.setHidden(True)
+        self.RuleChainLabel_Remove.setHidden(True)
+        self.UpdateRule.setHidden(False)
+
+        #filling in all the empty fields with data that was parsed from the confirmation screen
+        if chain == "INPUT":
+            self.RuleChain.setCurrentIndex(1) #set to INPUT
+        elif chain == "FORWARD":
+            self.RuleChain.setCurrentIndex(2) #set to FORWARD
+        elif chain == "OUTPUT":
+            self.RuleChain.setCurrentIndex(3) #set to OUTPUT
+
+        if protocol == "TCP":
+            self.TrafficType.setCurrentIndex(1) #set to TCP
+        elif protocol == "UDP":
+            self.TrafficType.setCurrentIndex(2) #set to UDP
+        elif protocol == "IP":
+            self.TrafficType.setCurrentIndex(3) #set to IP
+        elif protocol == "ICMP":
+            self.TrafficType.setCurrentIndex(4) #set to ICMP
+
+        if action == "ACCEPT":
+            self.Action.setCurrentIndex(1) #set to ACCEPT
+        elif action == "DROP":
+            self.Action.setCurrentIndex(2) #set to DROP
+        elif action == "REJECT":
+            self.Action.setCurrentIndex(3) #set to REJECT
+
+        #rest of the populating of data to containers other than combo-box, lineEdit containers below
+        self.spinBox.setValue(int(num))
+        self.SrcIP.setText(srcIP)
+        self.SrcPort.setText(spt)
+        self.DstIP.setText(dstIP)
+        self.DstPort.setText(dpt)
+
+    #Update rule to the actual iptable in Linux
+    def update_rule_button(self):
+        ip_regex = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(\\d|[1-2]\\d|3[0-2]))?$" #regular expression for IPv4 address + CIDR notation
+        #ip_regex = "^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])$" #old regular expression for IPv4 address does not check for CIDR
+        rule_flag = True #for checking if IP validation check passes
+        boxes = {} #dictionary to store values from boxes
+        boxes = {'num':self.spinBox,'chain':self.RuleChain,'protocol':self.TrafficType,'action':self.Action,'source':self.SrcIP,'src_port':self.SrcPort,'destination':self.DstIP,'dst_port':self.DstPort}
+        #Reset rules for each instance. New iptable rule
+        rules = {} #dictionary to store string representation value from variable "boxes" by toPlainText conversion, below is the conversion
+        rules['num'] = str(boxes['num'].value()) #spinBox type is int but needs to be converted to string in order to be concatenated
+        rules['chain'] = boxes['chain'].currentText() #Input, Forward, Output
+        rules['protocol'] = boxes['protocol'].currentText() #TCP, UDP, IP, ICMP
+        rules['action'] = boxes['action'].currentText() #Accept, Drop, Reject
+        rules['source'] = boxes['source'].text() #Source IP Address
+        rules['src_port'] = boxes['src_port'].text() #Source Port Number
+        rules['destination'] = boxes['destination'].text() #Destination IP Address
+        rules['dst_port'] = boxes['dst_port'].text() #Destination Port Number
+
+        #Check if Source IP/Destination IP addresses is valid:
+        if rules['source'] != '' and rules['destination'] != '': #if both boxes have fields
+            #valid, do nothing (pass)
+            #otherwise, toss an error dialog box, different reasonings below
+            if (re.search(ip_regex, rules['source']) and re.search(ip_regex, rules['destination'])): #if both valid via comparison
+                pass
             else:
-                self.disable_buttons()
-                self.UpdateRule.setEnabled(False)
-        else:
-            self.UpdateRule.setEnabled(False)
+                rule_flag = False
+                msg = QMessageBox()
+                msg.setWindowTitle("Error, Try Again!")
+                msg.setText("Source IP and Destination IP Address are Invalid.")
+                msg.setIcon(QMessageBox.Critical)
+                msg.exec_()
+        elif rules['source'] != '': #if source IP has fields
+            if (re.search(ip_regex, rules['source'])): #source IP is valid
+                pass
+            else:
+                rule_flag = False
+                msg = QMessageBox()
+                msg.setWindowTitle("Error, Try Again!")
+                msg.setText("Source IP Address is Invalid.")
+                msg.setIcon(QMessageBox.Critical)
+                msg.exec_()
+        elif rules['destination'] != '': #if destination IP has fields
+            if (re.search(ip_regex, rules['destination'])): #destination IP is valid
+                pass
+            else:
+                rule_flag = False
+                msg = QMessageBox()
+                msg.setWindowTitle("Error, Try Again!")
+                msg.setText("Destination IP Address is Invalid.")
+                msg.setIcon(QMessageBox.Critical)
+                msg.exec_()
 
-    #Will enable "Add Rule" button if dropdown box has changed from index 0 (placeholder values)
-    def check_rule(self):
-        if (self.RuleChain.currentIndex() > 0 and
-            self.TrafficType.currentIndex() > 0 and
-            self.Action.currentIndex() > 0):
-            self.AddRule.setEnabled(True) #When all no longer placeholder, enable the "Add Rule" button
-        else:
-            self.AddRule.setEnabled(False) #Otherwise disable the button
+        #Check if Ports are Valid
+        try: #if "Src Port" and "Dst Port" is valid
+            if rules['src_port'] != '':
+                if 1 <= int(rules['src_port']) <= 65535:
+                    pass
+                else:
+                    raise ValueError
+            if rules['dst_port'] != '':
+                if 1 <= int(rules['dst_port']) <= 65535:
+                    pass
+                else:
+                    raise ValueError
+        except ValueError: #catch the invalid and show popup about the error
+            rule_flag = False
+            msg = QMessageBox()
+            msg.setWindowTitle("Error, Try Again!")
+            msg.setText("Invalid Port Number, must be between 1 and 65535.")
+            msg.setIcon(QMessageBox.Critical)
+            msg.exec_()
 
-    #Disable text box if select ICMP or IP as "Traffic Type"
-    def disable_box(self, index):
-        if index!=3 and index!=4: #If TCP or UDP, enable edit
-            self.SrcPort.setPlaceholderText("Src Port")
-            self.SrcPort.setEnabled(True)
-            self.DstPort.setPlaceholderText("Dst Port")
-            self.DstPort.setEnabled(True)
-        else: #Otherwise disable edit for ICMP and IP
-            self.SrcPort.setText('') #clear SrcPort field, else data still transparent
-            self.DstPort.setText('') #clear DstPort field, else data still transparent
-            self.SrcPort.setPlaceholderText("N/A")
-            self.SrcPort.setEnabled(False)
-            self.DstPort.setPlaceholderText("N/A")
-            self.DstPort.setEnabled(False)
+        #If the IP check passes, add rule to iptables (Default = True, if fails validation check set to False)
+        if rule_flag:
+            self.autocomplete(rules['source'],rules['destination'],rules['src_port'],rules['dst_port']) #sending valid inputs to autocomplete to be saved
+        #Concatenate source, src_port, destination, dst_port to remove spaces when formatting bash command
+            if rules['source'] != '':
+                rules['source'] = ' --src ' + rules['source']
+            if rules['src_port'] != '':
+                rules['src_port'] = ' --sport ' + rules['src_port']
+            if rules['destination'] != '':
+                rules['destination'] = ' --dst ' + rules['destination']
+            if rules['dst_port'] != '':
+                rules['dst_port'] = ' --dport ' + rules['dst_port']
+            remainder_rule = rules['source'] + rules['src_port'] + rules['destination'] + rules['dst_port']
+
+            #print to see output format on commandline
+            print(f"sudo iptables -R {rules['chain']} {rules['num']} --protocol {rules['protocol']} --jump {rules['action']}{remainder_rule}")
+            #Run bash command to replace item in Linux iptables, command is built from dictionary variable values
+            commandline = subprocess.Popen([f"sudo iptables -R {rules['chain']} {rules['num']} --protocol {rules['protocol']} --jump {rules['action']}{remainder_rule}"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+            output, stderr_output = commandline.communicate()
+            self.view_rule() #calls view_rule function after adding rule (Updates iptable table on screen)
 
     #Remove rule to the actual iptable in Linux
     def remove_rule_button(self):
@@ -489,10 +558,11 @@ class Ui_MainWindow(object):
         #ip_regex = "^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])$" #old regular expression for IPv4 address does not check for CIDR
         rule_flag = True #for checking if IP validation check passes
         boxes = {} #dictionary to store values from boxes
-        boxes = {'chain':self.RuleChain,'protocol':self.TrafficType,'action':self.Action,'source':self.SrcIP,'src_port':self.SrcPort,'destination':self.DstIP,'dst_port':self.DstPort}
+        boxes = {'num':self.spinBox,'chain':self.RuleChain,'protocol':self.TrafficType,'action':self.Action,'source':self.SrcIP,'src_port':self.SrcPort,'destination':self.DstIP,'dst_port':self.DstPort}
         #Reset rules for each instance. New iptable rule
         rules = {} #dictionary to store string representation value from variable "boxes" by toPlainText conversion, below is the conversion
-        rules['chain'] = boxes['chain'].currentText() #Input, Forward, Output, Prerouting
+        rules['num'] = str(boxes['num'].value()) #spinBox type is int but needs to be converted to string in order to be concatenated
+        rules['chain'] = boxes['chain'].currentText() #Input, Forward, Output
         rules['protocol'] = boxes['protocol'].currentText() #TCP, UDP, IP, ICMP
         rules['action'] = boxes['action'].currentText() #Accept, Drop, Reject
         rules['source'] = boxes['source'].text() #Source IP Address
@@ -566,12 +636,60 @@ class Ui_MainWindow(object):
                 rules['dst_port'] = ' --dport ' + rules['dst_port']
             remainder_rule = rules['source'] + rules['src_port'] + rules['destination'] + rules['dst_port']
 
-            #print to see output format on commandline
-            print(f"sudo iptables --append {rules['chain']} --protocol {rules['protocol']} --jump {rules['action']}{remainder_rule}")
-            #Run bash command to add to Linux iptables, command is built from dictionary variable values
-            commandline = subprocess.Popen([f"sudo iptables --append {rules['chain']} --protocol {rules['protocol']} --jump {rules['action']}{remainder_rule}"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-            output, stderr_output = commandline.communicate()
-            self.view_rule() #calls view_rule function after adding rule (Updates iptable table on screen)
+            #insert mode if num spinbox is active
+            if boxes['num'].value() > 0:
+                #print to see output format on commandline
+                print(f"sudo iptables --insert {rules['chain']} {rules['num']} --protocol {rules['protocol']} --jump {rules['action']}{remainder_rule}")
+                #Run bash command to insert to Linux iptables, command is built from dictionary variable values
+                commandline = subprocess.Popen([f"sudo iptables --insert {rules['chain']} {rules['num']} --protocol {rules['protocol']} --jump {rules['action']}{remainder_rule}"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+                output, stderr_output = commandline.communicate()
+                self.view_rule() #calls view_rule function after adding rule (Updates iptable table on screen)
+            else: #otherwise it is just normal adding mode
+                #print to see output format on commandline
+                print(f"sudo iptables --append {rules['chain']} --protocol {rules['protocol']} --jump {rules['action']}{remainder_rule}")
+                #Run bash command to add to Linux iptables, command is built from dictionary variable values
+                commandline = subprocess.Popen([f"sudo iptables --append {rules['chain']} --protocol {rules['protocol']} --jump {rules['action']}{remainder_rule}"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+                output, stderr_output = commandline.communicate()
+                self.view_rule() #calls view_rule function after adding rule (Updates iptable table on screen)
+
+    def switch_name(self):
+        if self.spinBox.value() > 0:
+            self.AddRule.setText(QtCore.QCoreApplication.translate("MainWindow", "Insert Rule"))
+        else:
+            self.AddRule.setText(QtCore.QCoreApplication.translate("MainWindow", "Add Rule"))
+
+    #Will enable "Add Rule" button if dropdown box has changed from index 0 (placeholder values)
+    def check_rule(self):
+        if (self.RuleChain.currentIndex() > 0 and
+            self.TrafficType.currentIndex() > 0 and
+            self.Action.currentIndex() > 0):
+            self.AddRule.setEnabled(True) #When all no longer placeholder, enable the "Add Rule" button
+        else:
+            self.AddRule.setEnabled(False) #Otherwise disable the button
+
+    #Will enable "Update Rule" button if dropdown box has changed from index 0 (placeholder values)
+    def update_check_rule(self):
+        if (self.RuleChain.currentIndex() > 0 and
+            self.TrafficType.currentIndex() > 0 and
+            self.Action.currentIndex() > 0):
+            self.UpdateRule.setEnabled(True) #When all no longer placeholder, enable the "Update Rule" button
+        else:
+            self.UpdateRule.setEnabled(False) #Otherwise disable the button
+
+    #Disable text box if select ICMP or IP as "Traffic Type"
+    def disable_box(self, index):
+        if index!=3 and index!=4: #If TCP or UDP, enable edit
+            self.SrcPort.setPlaceholderText("Src Port")
+            self.SrcPort.setEnabled(True)
+            self.DstPort.setPlaceholderText("Dst Port")
+            self.DstPort.setEnabled(True)
+        else: #Otherwise disable edit for ICMP and IP
+            self.SrcPort.setText('') #clear SrcPort field, else data still transparent
+            self.DstPort.setText('') #clear DstPort field, else data still transparent
+            self.SrcPort.setPlaceholderText("N/A")
+            self.SrcPort.setEnabled(False)
+            self.DstPort.setPlaceholderText("N/A")
+            self.DstPort.setEnabled(False)
 
     #Confirmation popup box to flushing the tables. Options: "Yes" or "Cancel"
     def show_popup(self):
@@ -610,7 +728,7 @@ class Ui_MainWindow(object):
 
     #Clear all textbox and dropdown box to be empty
     def clear_text(self):
-        self.spinBox.setValue(1)
+        self.spinBox.setValue(0)
         self.RuleChain.setCurrentIndex(0)
         self.TrafficType.setCurrentIndex(0)
         self.Action.setCurrentIndex(0)
@@ -620,7 +738,7 @@ class Ui_MainWindow(object):
         self.DstPort.setText('')
         self.SrcPort.setPlaceholderText("Src Port")
         self.DstPort.setPlaceholderText("Dst Port")
-        self.spinBox_Remove.setValue(1)
+        self.spinBox_Remove.setValue(0)
         self.RuleChain_Remove.setCurrentIndex(0)
 
     #Will unhide once field has value, and will hide again once empty
@@ -654,6 +772,7 @@ class Ui_MainWindow(object):
         else:
             self.DestPortLabel.setHidden(True)
 
+    #Should have definitely used a container for these two functions.
     def unhide(self):
         self.spinBox.setHidden(False)
         self.Num.setHidden(False)
@@ -665,7 +784,6 @@ class Ui_MainWindow(object):
         self.DstIP.setHidden(False)
         self.DstPort.setHidden(False)
         self.Clear.setHidden(False)
-
     def hide(self):
         self.spinBox.setHidden(True)
         self.Num.setHidden(True)
@@ -678,21 +796,92 @@ class Ui_MainWindow(object):
         self.DstPort.setHidden(True)
         self.Clear.setHidden(True)
 
-    def disable_buttons(self):
-        self.TrafficType.setEnabled(False)
-        self.Action.setEnabled(False)
-        self.SrcIP.setEnabled(False)
-        self.SrcPort.setEnabled(False)
-        self.DstIP.setEnabled(False)
-        self.DstPort.setEnabled(False)
+    def uncheck_update(self): #call by changes to Check_Update
+        if self.Check_Update.isChecked(): #if update is checked, hide other buttons and show only "Update Rule" button
+            self.Check_Remove.setChecked(False) #unchecks the remove checkbox so no error
+            self.AddRule.setHidden(True)
+            self.RemoveRule.setHidden(True)
+            self.UpdateRule.setHidden(True)
+            self.UpdateConfirm.setHidden(False) #only show Confirm Button
+            self.clear_text()
+            self.hide()
+            #unhide two UI when checked
+            self.spinBox_Remove.setHidden(False)
+            self.Num_Remove.setHidden(False)
+            self.RuleChain_Remove.setHidden(False)
+            self.RuleChainLabel_Remove.setHidden(False)
 
-    def enable_buttons(self):
-        self.TrafficType.setEnabled(True)
-        self.Action.setEnabled(True)
-        self.SrcIP.setEnabled(True)
-        self.SrcPort.setEnabled(True)
-        self.DstIP.setEnabled(True)
-        self.DstPort.setEnabled(True)
+        else: #for when update is unchecked bring back "Add Rule"
+            self.AddRule.setHidden(False) #only show back the Add Rule Button
+            self.UpdateConfirm.setHidden(True)
+            self.UpdateRule.setHidden(True)
+            #hide two UI when unchecked
+            self.spinBox_Remove.setHidden(True)
+            self.Num_Remove.setHidden(True)
+            self.RuleChain_Remove.setHidden(True)
+            self.RuleChainLabel_Remove.setHidden(True)
+            self.clear_text() #clear text to have clean slate
+            self.unhide() #calling unhide function to show all original UI
+
+    def uncheck_remove(self): #call by changes to Check_Remove
+        if self.Check_Remove.isChecked(): #if remove is checked, hide other buttons and show only "Remove Rule" button
+            self.Check_Update.setChecked(False) #unchecks the update checkbox so no error
+            self.AddRule.setHidden(True)
+            self.UpdateRule.setHidden(True)
+            self.RemoveRule.setHidden(False) #only show Remove Rule Button
+            #unhide two UI when checked
+            self.spinBox_Remove.setHidden(False)
+            self.Num_Remove.setHidden(False)
+            self.RuleChain_Remove.setHidden(False)
+            self.RuleChainLabel_Remove.setHidden(False)
+            self.clear_text() #clear text to have clean slate
+            self.hide() #calling hide function to hide all original UI
+        else: #for when remove is unchecked bring back "Add Rule"
+            self.AddRule.setHidden(False)
+            self.RemoveRule.setHidden(True)
+            #hide two UI when unchecked
+            self.spinBox_Remove.setHidden(True)
+            self.Num_Remove.setHidden(True)
+            self.RuleChain_Remove.setHidden(True)
+            self.RuleChainLabel_Remove.setHidden(True)
+            self.clear_text() #clear text to have clean slate
+            self.unhide() #calling unhide function to show all original UI
+
+    #Autocomplete option for when need to access previous inputted IP address, called by add_rule_button after validation check
+    def autocomplete(self, srcIP, dstIP, srcPort, dstPort):
+        #append valid inputs to respective lists, only if it is a unique entry
+        if srcIP not in src_ip:
+            src_ip.append(srcIP)
+        if dstIP not in dst_ip:
+            dst_ip.append(dstIP)
+        if srcPort not in src_port:
+            src_port.append(srcPort)
+        if dstPort not in dst_port:
+            dst_port.append(dstPort)
+        #grab all items from lists and convert to Qcompleter type
+        src_ip_com = QtWidgets.QCompleter(src_ip)
+        dst_ip_com = QtWidgets.QCompleter(dst_ip)
+        src_port_com = QtWidgets.QCompleter(src_port)
+        dst_port_com = QtWidgets.QCompleter(dst_port)
+        #set autocomplete options taken from conversion of _com for respective lineEdit boxes
+        self.SrcIP.setCompleter(src_ip_com)
+        self.DstIP.setCompleter(dst_ip_com)
+        self.SrcPort.setCompleter(src_port_com)
+        self.DstPort.setCompleter(dst_port_com)
+
+    #Will enable "Remove Rule" button if the "Chain Rule" (for removal) dropdown box has been changed
+    def check_remove(self):
+        if self.RuleChain_Remove.currentIndex() > 0:
+            self.RemoveRule.setEnabled(True)
+        else:
+            self.RemoveRule.setEnabled(False)
+
+    #Will enable "Confirm" button if the "Chain Rule" (for update) dropdown box has been changed
+    def check_update(self):
+        if self.RuleChain_Remove.currentIndex() > 0:
+            self.UpdateConfirm.setEnabled(True)
+        else:
+            self.UpdateConfirm.setEnabled(False)
 
 ### DUNDER CHECK ###
 if __name__ == "__main__":
