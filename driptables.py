@@ -4,20 +4,23 @@
 import subprocess,re,sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
 #global variables so that when autocomplete function is called does not reset containers
 src_ip = []
 dst_ip = []
 src_port = []
 dst_port = []
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1407, 966)
+        MainWindow.resize(1413, 881)
         MainWindow.setStyleSheet("font: 13pt \"Roboto Slab\";\n""")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.RuleChain = QtWidgets.QComboBox(self.centralwidget)
-        self.RuleChain.setGeometry(QtCore.QRect(70, 620, 151, 61))
+        self.RuleChain.setGeometry(QtCore.QRect(100, 620, 151, 61))
         font = QtGui.QFont()
         font.setFamily("Roboto Slab")
         font.setPointSize(13)
@@ -35,7 +38,7 @@ class Ui_MainWindow(object):
         self.RuleChain.addItem("")
         self.RuleChain.addItem("")
         self.TrafficType = QtWidgets.QComboBox(self.centralwidget)
-        self.TrafficType.setGeometry(QtCore.QRect(240, 620, 151, 61))
+        self.TrafficType.setGeometry(QtCore.QRect(270, 620, 151, 61))
         font = QtGui.QFont()
         font.setFamily("Roboto Slab")
         font.setPointSize(13)
@@ -51,7 +54,7 @@ class Ui_MainWindow(object):
         self.TrafficType.addItem("")
         self.TrafficType.addItem("")
         self.Action = QtWidgets.QComboBox(self.centralwidget)
-        self.Action.setGeometry(QtCore.QRect(410, 620, 151, 61))
+        self.Action.setGeometry(QtCore.QRect(440, 620, 151, 61))
         font = QtGui.QFont()
         font.setFamily("Roboto Slab")
         font.setPointSize(13)
@@ -67,7 +70,7 @@ class Ui_MainWindow(object):
         self.Action.addItem("")
         self.Action.addItem("")
         self.Clear = QtWidgets.QPushButton(self.centralwidget)
-        self.Clear.setGeometry(QtCore.QRect(1240, 630, 101, 31))
+        self.Clear.setGeometry(QtCore.QRect(1280, 630, 101, 31))
         font = QtGui.QFont()
         font.setFamily("Roboto Slab")
         font.setPointSize(13)
@@ -77,7 +80,7 @@ class Ui_MainWindow(object):
         self.Clear.setFont(font)
         self.Clear.setObjectName("Clear")
         self.AddRule = QtWidgets.QPushButton(self.centralwidget)
-        self.AddRule.setGeometry(QtCore.QRect(480, 720, 201, 91))
+        self.AddRule.setGeometry(QtCore.QRect(590, 720, 201, 91))
         font = QtGui.QFont()
         font.setFamily("Roboto Slab")
         font.setPointSize(13)
@@ -86,38 +89,8 @@ class Ui_MainWindow(object):
         font.setWeight(50)
         self.AddRule.setFont(font)
         self.AddRule.setObjectName("AddRule")
-        self.SrcPort = QtWidgets.QLineEdit(self.centralwidget)
-        self.SrcPort.setGeometry(QtCore.QRect(810, 620, 81, 61))
-        font = QtGui.QFont()
-        font.setFamily("Roboto Slab")
-        font.setPointSize(13)
-        font.setBold(False)
-        font.setItalic(False)
-        font.setWeight(50)
-        self.SrcPort.setFont(font)
-        self.SrcPort.setObjectName("SrcPort")
-        self.DstIP = QtWidgets.QLineEdit(self.centralwidget)
-        self.DstIP.setGeometry(QtCore.QRect(910, 620, 211, 61))
-        font = QtGui.QFont()
-        font.setFamily("Roboto Slab")
-        font.setPointSize(13)
-        font.setBold(False)
-        font.setItalic(False)
-        font.setWeight(50)
-        self.DstIP.setFont(font)
-        self.DstIP.setObjectName("DstIP")
-        self.DstPort = QtWidgets.QLineEdit(self.centralwidget)
-        self.DstPort.setGeometry(QtCore.QRect(1140, 620, 81, 61))
-        font = QtGui.QFont()
-        font.setFamily("Roboto Slab")
-        font.setPointSize(13)
-        font.setBold(False)
-        font.setItalic(False)
-        font.setWeight(50)
-        self.DstPort.setFont(font)
-        self.DstPort.setObjectName("DstPort")
         self.Reset = QtWidgets.QPushButton(self.centralwidget)
-        self.Reset.setGeometry(QtCore.QRect(610, 850, 161, 61))
+        self.Reset.setGeometry(QtCore.QRect(1270, 780, 131, 41))
         font = QtGui.QFont()
         font.setFamily("Roboto Slab")
         font.setPointSize(13)
@@ -127,7 +100,7 @@ class Ui_MainWindow(object):
         self.Reset.setFont(font)
         self.Reset.setObjectName("Reset")
         self.UpdateRule = QtWidgets.QPushButton(self.centralwidget)
-        self.UpdateRule.setGeometry(QtCore.QRect(690, 720, 201, 91))
+        self.UpdateRule.setGeometry(QtCore.QRect(590, 720, 201, 91))
         font = QtGui.QFont()
         font.setFamily("Roboto Slab")
         font.setPointSize(13)
@@ -144,57 +117,128 @@ class Ui_MainWindow(object):
         self.RuleArea = QtWidgets.QWidget()
         self.RuleArea.setGeometry(QtCore.QRect(0, 0, 1379, 579))
         self.RuleArea.setObjectName("RuleArea")
-        self.label = QtWidgets.QLabel(self.RuleArea)
-        self.label.setGeometry(QtCore.QRect(610, 0, 111, 19))
-        self.label.setObjectName("label")
+        self.Title = QtWidgets.QLabel(self.RuleArea)
+        self.Title.setGeometry(QtCore.QRect(580, 0, 191, 19))
+        self.Title.setObjectName("Title")
         self.showL = QtWidgets.QTextBrowser(self.RuleArea)
-        self.showL.setObjectName("showL")
         self.showL.setGeometry(QtCore.QRect(20, 30, 1331, 531))
+        self.showL.setObjectName("showL")
         self.RuleView.setWidget(self.RuleArea)
         self.SourceLabel = QtWidgets.QLabel(self.centralwidget)
-        self.SourceLabel.setGeometry(QtCore.QRect(650, 600, 81, 19))
+        self.SourceLabel.setGeometry(QtCore.QRect(680, 600, 81, 19))
         self.SourceLabel.setObjectName("SourceLabel")
         self.SrcPortLabel = QtWidgets.QLabel(self.centralwidget)
-        self.SrcPortLabel.setGeometry(QtCore.QRect(820, 600, 71, 19))
+        self.SrcPortLabel.setGeometry(QtCore.QRect(850, 600, 71, 19))
         self.SrcPortLabel.setObjectName("SrcPortLabel")
         self.DestinationLabel = QtWidgets.QLabel(self.centralwidget)
-        self.DestinationLabel.setGeometry(QtCore.QRect(960, 600, 121, 19))
+        self.DestinationLabel.setGeometry(QtCore.QRect(990, 600, 121, 19))
         self.DestinationLabel.setObjectName("DestinationLabel")
         self.DestPortLabel = QtWidgets.QLabel(self.centralwidget)
-        self.DestPortLabel.setGeometry(QtCore.QRect(1150, 600, 71, 19))
+        self.DestPortLabel.setGeometry(QtCore.QRect(1180, 600, 71, 19))
         self.DestPortLabel.setObjectName("DestPortLabel")
         self.ActionLabel = QtWidgets.QLabel(self.centralwidget)
-        self.ActionLabel.setGeometry(QtCore.QRect(460, 600, 61, 19))
+        self.ActionLabel.setGeometry(QtCore.QRect(490, 600, 61, 19))
         self.ActionLabel.setObjectName("ActionLabel")
         self.TrafficeTypeLabel = QtWidgets.QLabel(self.centralwidget)
-        self.TrafficeTypeLabel.setGeometry(QtCore.QRect(270, 600, 101, 19))
+        self.TrafficeTypeLabel.setGeometry(QtCore.QRect(300, 600, 101, 19))
         self.TrafficeTypeLabel.setObjectName("TrafficeTypeLabel")
         self.RuleChainLabel = QtWidgets.QLabel(self.centralwidget)
-        self.RuleChainLabel.setGeometry(QtCore.QRect(100, 600, 91, 19))
+        self.RuleChainLabel.setGeometry(QtCore.QRect(130, 600, 91, 19))
         self.RuleChainLabel.setObjectName("RuleChainLabel")
-        self.SrcIP = QtWidgets.QLineEdit(self.centralwidget)
-        self.SrcIP.setGeometry(QtCore.QRect(580, 620, 211, 61))
+        self.Check_Add = QtWidgets.QLabel(self.centralwidget)
+        self.Check_Add.setGeometry(QtCore.QRect(820, 720, 91, 31))
+        self.Check_Add.setStyleSheet("background-color: rgb(255, 255, 255);\n""color: rgb(0, 0, 0);")
+        self.Check_Add.setObjectName("Check_Add")
+        self.Check_Remove = QtWidgets.QCheckBox(self.centralwidget)
+        self.Check_Remove.setGeometry(QtCore.QRect(820, 780, 91, 31))
+        self.Check_Remove.setStyleSheet("background-color: rgb(255, 255, 255);\n""color: rgb(0, 0, 0);")
+        self.Check_Remove.setObjectName("Check_Remove")
+        self.Check_Update = QtWidgets.QCheckBox(self.centralwidget)
+        self.Check_Update.setGeometry(QtCore.QRect(820, 750, 91, 31))
+        self.Check_Update.setStyleSheet("background-color: rgb(255, 255, 255);\n""color: rgb(0, 0, 0);")
+        self.Check_Update.setObjectName("Check_Update")
+        self.spinBox = QtWidgets.QSpinBox(self.centralwidget)
+        self.spinBox.setGeometry(QtCore.QRect(20, 620, 61, 61))
+        self.spinBox.setObjectName("spinBox")
+        self.Num = QtWidgets.QLabel(self.centralwidget)
+        self.Num.setGeometry(QtCore.QRect(30, 600, 41, 19))
+        self.Num.setObjectName("Num")
+        self.RemoveRule = QtWidgets.QPushButton(self.centralwidget)
+        self.RemoveRule.setGeometry(QtCore.QRect(590, 720, 201, 91))
         font = QtGui.QFont()
         font.setFamily("Roboto Slab")
         font.setPointSize(13)
         font.setBold(False)
         font.setItalic(False)
         font.setWeight(50)
-        self.SrcIP.setFont(font)
+        self.RemoveRule.setFont(font)
+        self.RemoveRule.setObjectName("RemoveRule")
+        self.spinBox_Remove = QtWidgets.QSpinBox(self.centralwidget)
+        self.spinBox_Remove.setGeometry(QtCore.QRect(330, 740, 61, 61))
+        self.spinBox_Remove.setObjectName("spinBox_Remove")
+        self.RuleChain_Remove = QtWidgets.QComboBox(self.centralwidget)
+        self.RuleChain_Remove.setGeometry(QtCore.QRect(410, 740, 151, 61))
+        font = QtGui.QFont()
+        font.setFamily("Roboto Slab")
+        font.setPointSize(13)
+        font.setBold(False)
+        font.setItalic(False)
+        font.setWeight(50)
+        self.RuleChain_Remove.setFont(font)
+        self.RuleChain_Remove.setStyleSheet("")
+        self.RuleChain_Remove.setPlaceholderText("")
+        self.RuleChain_Remove.setObjectName("RuleChain_Remove")
+        self.RuleChain_Remove.addItem("")
+        self.RuleChain_Remove.setItemText(0, "Rule Chain")
+        self.RuleChain_Remove.addItem("")
+        self.RuleChain_Remove.addItem("")
+        self.RuleChain_Remove.addItem("")
+        self.RuleChain_Remove.addItem("")
+        self.Num_Remove = QtWidgets.QLabel(self.centralwidget)
+        self.Num_Remove.setGeometry(QtCore.QRect(340, 720, 41, 19))
+        self.Num_Remove.setObjectName("Num_Remove")
+        self.RuleChainLabel_Remove = QtWidgets.QLabel(self.centralwidget)
+        self.RuleChainLabel_Remove.setGeometry(QtCore.QRect(440, 720, 91, 19))
+        self.RuleChainLabel_Remove.setObjectName("RuleChainLabel_Remove")
+        self.SrcIP = QtWidgets.QLineEdit(self.centralwidget)
+        self.SrcIP.setGeometry(QtCore.QRect(610, 620, 211, 61))
         self.SrcIP.setObjectName("SrcIP")
+        self.DstIP = QtWidgets.QLineEdit(self.centralwidget)
+        self.DstIP.setGeometry(QtCore.QRect(940, 620, 211, 61))
+        self.DstIP.setObjectName("DstIP")
+        self.SrcPort = QtWidgets.QLineEdit(self.centralwidget)
+        self.SrcPort.setGeometry(QtCore.QRect(840, 620, 81, 61))
+        self.SrcPort.setObjectName("SrcPort")
+        self.DstPort = QtWidgets.QLineEdit(self.centralwidget)
+        self.DstPort.setGeometry(QtCore.QRect(1170, 620, 81, 61))
+        self.DstPort.setObjectName("DstPort")
+        self.toolButton = QtWidgets.QToolButton(self.centralwidget)
+        self.toolButton.setGeometry(QtCore.QRect(10, 790, 61, 26))
+        self.toolButton.setObjectName("toolButton")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1407, 28))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1413, 28))
         self.menubar.setObjectName("menubar")
+        self.menuSave = QtWidgets.QMenu(self.menubar)
+        self.menuSave.setObjectName("menuSave")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
+        self.actionSave = QtWidgets.QAction(MainWindow)
+        self.actionSave.setObjectName("actionSave")
+        self.actionRestore = QtWidgets.QAction(MainWindow)
+        self.actionRestore.setObjectName("actionRestore")
+        self.menuSave.addAction(self.actionSave)
+        self.menuSave.addAction(self.actionRestore)
+        self.menuSave.addSeparator()
+        self.menubar.addAction(self.menuSave.menuAction())
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
         #When a button is clicked (fuction calls)
         self.AddRule.clicked.connect(self.add_rule_button) #calls add_rule_button function when clicked. (Adds rule)
+        self.RemoveRule.clicked.connect(self.remove_rule_button) #call remove_rule_button when clicked. (Removes rule)
         self.Reset.clicked.connect(self.show_popup) #calls show_popup function when clicked. (Confirmation screen)
         self.Clear.clicked.connect(self.clear_text) #calls clear_text when clicked. (Clear box text)
         self.TrafficType.currentIndexChanged.connect(self.disable_box) #calls disable_box when "Traffic Type" dropdown value changes. Checks for ICMP/IP
@@ -202,6 +246,7 @@ class Ui_MainWindow(object):
         #set buttons state
         self.AddRule.setEnabled(False) #set "Add Rule" button unclickable for beginning
         self.UpdateRule.setEnabled(False) #set "Update Rule" button unclickable for beginning
+        self.RemoveRule.setEnabled(False) #set "Remove Rule" button unclickable for beginning
 
         #Calls check_rule, if "RuleChain, TrafficType, Action" are changed from index 0. Allows "Add Rule" button to be active
         self.RuleChain.currentIndexChanged.connect(self.check_rule)
@@ -224,14 +269,33 @@ class Ui_MainWindow(object):
         self.DstIP.textChanged.connect(self.hidden_label)
         self.DstPort.textChanged.connect(self.hidden_label)
 
+        #Hidden State for Remove Button toggle checkmark
+        self.Num_Remove.setHidden(True)
+        self.spinBox_Remove.setHidden(True)
+        self.RuleChain_Remove.setHidden(True)
+        self.RuleChainLabel_Remove.setHidden(True)
+
+        #Checkbox state
+        self.Check_Add.setAlignment(QtCore.Qt.AlignCenter) #Alignment of the "Mode" Label
+        self.Check_Update.stateChanged.connect(self.uncheck_update) #only allows 1 check, will do tasks for "Update" mode
+        self.Check_Remove.stateChanged.connect(self.uncheck_remove) #only allows 1 check, will do tasks for "Remove" mode
+        self.RuleChain_Remove.currentIndexChanged.connect(self.check_remove) #if the dropdown list for the remove "Rule Chain" has changed from index 0 enable the button
+        self.RuleChain.currentIndexChanged.connect(self.check_update)
+
         #View iptable rules on screen via GUI, initially running "sudo iptables -L" by calling function "view_rule"
         self.view_rule()
+
+        #Checkbox state, set buttons for both to be hidden from beginning, only "Add Rule" by default
+        self.UpdateRule.setHidden(True)
+        self.RemoveRule.setHidden(True)
 
         #Set Character Limit, 15 for IP including '.' and 5 for Port since 65535
         self.SrcIP.setMaxLength(18)
         self.SrcPort.setMaxLength(5)
         self.DstIP.setMaxLength(18)
         self.DstPort.setMaxLength(5)
+        self.spinBox.setMinimum(1)
+        self.spinBox_Remove.setMinimum(1)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -249,14 +313,11 @@ class Ui_MainWindow(object):
         self.Action.setItemText(1, _translate("MainWindow", "ACCEPT"))
         self.Action.setItemText(2, _translate("MainWindow", "DROP"))
         self.Action.setItemText(3, _translate("MainWindow", "REJECT"))
-        self.Clear.setText(_translate("MainWindow", "Clear"))
+        self.Clear.setText(_translate("MainWindow", "CLEAR"))
         self.AddRule.setText(_translate("MainWindow", "Add Rule"))
-        self.SrcPort.setPlaceholderText(_translate("MainWindow", "Src Port"))
-        self.DstIP.setPlaceholderText(_translate("MainWindow", "Destination IP"))
-        self.DstPort.setPlaceholderText(_translate("MainWindow", "Dst Port"))
-        self.Reset.setText(_translate("MainWindow", "Reset All Rules"))
+        self.Reset.setText(_translate("MainWindow", "Reset Rules"))
         self.UpdateRule.setText(_translate("MainWindow", "Update Rule"))
-        self.label.setText(_translate("MainWindow", "Current Rules"))
+        self.Title.setText(_translate("MainWindow", "Current IP Tables Rules"))
         self.SourceLabel.setText(_translate("MainWindow", "Source IP"))
         self.SrcPortLabel.setText(_translate("MainWindow", "Src Port"))
         self.DestinationLabel.setText(_translate("MainWindow", "Destination IP"))
@@ -264,9 +325,67 @@ class Ui_MainWindow(object):
         self.ActionLabel.setText(_translate("MainWindow", "Action"))
         self.TrafficeTypeLabel.setText(_translate("MainWindow", "Traffic Type"))
         self.RuleChainLabel.setText(_translate("MainWindow", "Rule Chain"))
+        self.Check_Add.setText(_translate("MainWindow", "Modes"))
+        self.Check_Remove.setText(_translate("MainWindow", "Remove"))
+        self.Check_Update.setText(_translate("MainWindow", "Update"))
+        self.Num.setText(_translate("MainWindow", "Num"))
+        self.RemoveRule.setText(_translate("MainWindow", "Remove Rule"))
+        self.RuleChain_Remove.setItemText(1, _translate("MainWindow", "INPUT"))
+        self.RuleChain_Remove.setItemText(2, _translate("MainWindow", "FORWARD"))
+        self.RuleChain_Remove.setItemText(3, _translate("MainWindow", "OUTPUT"))
+        self.RuleChain_Remove.setItemText(4, _translate("MainWindow", "PREROUTING"))
+        self.Num_Remove.setText(_translate("MainWindow", "Num"))
+        self.RuleChainLabel_Remove.setText(_translate("MainWindow", "Rule Chain"))
         self.SrcIP.setPlaceholderText(_translate("MainWindow", "Source IP"))
+        self.DstIP.setPlaceholderText(_translate("MainWindow", "Destination IP"))
+        self.SrcPort.setPlaceholderText(_translate("MainWindow", "Src Port"))
+        self.DstPort.setPlaceholderText(_translate("MainWindow", "Dst Port"))
+        self.toolButton.setText(_translate("MainWindow", "Info"))
+        self.menuSave.setTitle(_translate("MainWindow", "File"))
+        self.actionSave.setText(_translate("MainWindow", "Save"))
+        self.actionRestore.setText(_translate("MainWindow", "Restore"))
 
 ### HELPER FUNCTIONS ###
+    def uncheck_update(self): #call by changes to Check_Update
+        if self.Check_Update.isChecked(): #if update is checked, hide other buttons and show only "Update Rule" button
+            self.Check_Remove.setChecked(False) #unchecks the remove checkbox so no error
+            self.AddRule.setHidden(True)
+            self.RemoveRule.setHidden(True)
+            self.UpdateRule.setHidden(False)
+            self.clear_text()
+            self.disable_buttons()
+
+        else: #for when update is unchecked bring back "Add Rule"
+            self.AddRule.setHidden(False)
+            self.UpdateRule.setHidden(True)
+            self.clear_text()
+            self.enable_buttons()
+
+    def uncheck_remove(self): #call by changes to Check_Remove
+        if self.Check_Remove.isChecked(): #if remove is checked, hide other buttons and show only "Remove Rule" button
+            self.Check_Update.setChecked(False) #unchecks the update checkbox so no error
+            self.AddRule.setHidden(True)
+            self.UpdateRule.setHidden(True)
+            self.RemoveRule.setHidden(False)
+            #hiding all UI, and only show two UI boxes
+            self.clear_text() #clear text to have clean slate
+            self.hide() #calling hide function to hide all original UI
+            #unhide two UI when checked
+            self.spinBox_Remove.setHidden(False)
+            self.Num_Remove.setHidden(False)
+            self.RuleChain_Remove.setHidden(False)
+            self.RuleChainLabel_Remove.setHidden(False)
+        else: #for when remove is unchecked bring back "Add Rule"
+            self.AddRule.setHidden(False)
+            self.RemoveRule.setHidden(True)
+            #hide two UI when unchecked
+            self.spinBox_Remove.setHidden(True)
+            self.Num_Remove.setHidden(True)
+            self.RuleChain_Remove.setHidden(True)
+            self.RuleChainLabel_Remove.setHidden(True)
+            self.clear_text() #clear text to have clean slate
+            self.unhide() #calling unhide function to show all original UI
+
     #Autocomplete option for when need to access previous inputted IP address, called by add_rule_button after validation check
     def autocomplete(self, srcIP, dstIP, srcPort, dstPort):
         #append valid inputs to respective lists, only if it is a unique entry
@@ -298,8 +417,34 @@ class Ui_MainWindow(object):
         self.showL.selectAll() #selecting all plaintext
         self.showL.setAlignment(QtCore.Qt.AlignCenter) #centering all text selected in previous statement
 
+    #Will enable "Remove Rule" button if the "Chain Rule" (for removal) dropdown box has been changed
+    def check_remove(self):
+        if self.RuleChain_Remove.currentIndex() > 0:
+            self.RemoveRule.setEnabled(True)
+        else:
+            self.RemoveRule.setEnabled(False)
 
-    #Will enable "Add Rule" button if dropdown box have changed from index 0 (placeholder values)
+    #Will enable "Update Rule" button if the "Chain Rule" dropdown box has been changed
+    def check_update(self):
+        if self.Check_Update.isChecked(): #check if Update is checked first before doing all remaining tasks
+            if self.RuleChain.currentIndex() > 0:
+                self.enable_buttons()
+                self.UpdateRule.setEnabled(True)
+                if self.RuleChain.currentText() == "INPUT":
+                    pass #parse and match from iptable correct rule to populate (Traffic Type, Action, SrcIP, SrcPort, DstIP, DstPort)
+                elif self.RuleChain.currentText() == "FORWARD":
+                    pass #parse and match from iptable correct rule to populate (Traffic Type, Action, SrcIP, SrcPort, DstIP, DstPort)
+                elif self.RuleChain.currentText() == "OUTPUT":
+                    pass #parse and match from iptable correct rule to populate (Traffic Type, Action, SrcIP, SrcPort, DstIP, DstPort)
+                else:
+                    pass
+            else:
+                self.disable_buttons()
+                self.UpdateRule.setEnabled(False)
+        else:
+            self.UpdateRule.setEnabled(False)
+
+    #Will enable "Add Rule" button if dropdown box has changed from index 0 (placeholder values)
     def check_rule(self):
         if (self.RuleChain.currentIndex() > 0 and
             self.TrafficType.currentIndex() > 0 and
@@ -322,6 +467,21 @@ class Ui_MainWindow(object):
             self.SrcPort.setEnabled(False)
             self.DstPort.setPlaceholderText("N/A")
             self.DstPort.setEnabled(False)
+
+    #Remove rule to the actual iptable in Linux
+    def remove_rule_button(self):
+        removal = {} #dictionary, below is saving the value as a string type to concatenate
+        removal['num'] = str(self.spinBox_Remove.value())
+        removal['chain'] = self.RuleChain_Remove.currentText()
+
+        #*** Need a validation method to find out if a rule is existent, implement later ***
+
+        #print to see output format on commandline
+        print(f"sudo iptables -D {removal['chain']} {removal['num']}")
+        #Run bash command to remove rule from Linux iptables, command is built from dictionary variable values
+        commandline = subprocess.Popen([f"sudo iptables -D {removal['chain']} {removal['num']}"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+        output, stderr_output = commandline.communicate()
+        self.view_rule() #calls view_rule function after removing rule (Updates iptable table on screen after deletion)
 
     #Add rule to the actual iptable in Linux
     def add_rule_button(self):
@@ -417,24 +577,40 @@ class Ui_MainWindow(object):
     def show_popup(self):
         msg = QMessageBox()
         msg.setWindowTitle("Flush iptables")
-        msg.setText("Reset all iptable rules?")
+        msg.setText("Reset which iptable chain or ALL?")
         msg.setIcon(QMessageBox.Warning)
-        msg.setStandardButtons(QMessageBox.Yes|QMessageBox.Cancel) #Two buttons, "Yes" or "Cancel"
-        msg.setDefaultButton(QMessageBox.Cancel) #Default button = "Cancel" for clarity, in case mistakenly flush iptables
+        #Four buttons added for which chain to flush on iptable
+        msg.addButton(QPushButton('INPUT'), QMessageBox.NoRole)
+        msg.addButton(QPushButton('FORWARD'), QMessageBox.RejectRole)
+        msg.addButton(QPushButton('OUTPUT'), QMessageBox.HelpRole)
+        msg.addButton(QPushButton('ALL'), QMessageBox.YesRole)
         msg.buttonClicked.connect(self.reset) #Activate from click on any button, calls reset function below
         msg.exec_() #Popup box appear on screen
 
     #Reset function after show_popup check
     def reset(self, whichButton):
-        if whichButton.text() == "&Yes": #if "Yes" button clicked, flush the tables via bash command
+        if whichButton.text() == "ALL": #if "Yes" button clicked, flush the tables via bash command
             reset = subprocess.Popen([f"sudo iptables -F"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
             output, stderr_output = reset.communicate()
             self.view_rule() #calls the function to update with empty table
+        elif whichButton.text() == "INPUT":
+            reset = subprocess.Popen([f"sudo iptables -F INPUT"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+            output, stderr_output = reset.communicate()
+            self.view_rule()
+        elif whichButton.text() == "FORWARD":
+            reset = subprocess.Popen([f"sudo iptables -F FORWARD"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+            output, stderr_output = reset.communicate()
+            self.view_rule()
+        elif whichButton.text() == "OUTPUT":
+            reset = subprocess.Popen([f"sudo iptables -F OUTPUT"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+            output, stderr_output = reset.communicate()
+            self.view_rule()
         else:
             pass #Clicked Cancel, do nothing and exit
 
     #Clear all textbox and dropdown box to be empty
     def clear_text(self):
+        self.spinBox.setValue(1)
         self.RuleChain.setCurrentIndex(0)
         self.TrafficType.setCurrentIndex(0)
         self.Action.setCurrentIndex(0)
@@ -444,6 +620,8 @@ class Ui_MainWindow(object):
         self.DstPort.setText('')
         self.SrcPort.setPlaceholderText("Src Port")
         self.DstPort.setPlaceholderText("Dst Port")
+        self.spinBox_Remove.setValue(1)
+        self.RuleChain_Remove.setCurrentIndex(0)
 
     #Will unhide once field has value, and will hide again once empty
     def hidden_label(self):
@@ -476,8 +654,49 @@ class Ui_MainWindow(object):
         else:
             self.DestPortLabel.setHidden(True)
 
+    def unhide(self):
+        self.spinBox.setHidden(False)
+        self.Num.setHidden(False)
+        self.RuleChain.setHidden(False)
+        self.TrafficType.setHidden(False)
+        self.Action.setHidden(False)
+        self.SrcIP.setHidden(False)
+        self.SrcPort.setHidden(False)
+        self.DstIP.setHidden(False)
+        self.DstPort.setHidden(False)
+        self.Clear.setHidden(False)
+
+    def hide(self):
+        self.spinBox.setHidden(True)
+        self.Num.setHidden(True)
+        self.RuleChain.setHidden(True)
+        self.TrafficType.setHidden(True)
+        self.Action.setHidden(True)
+        self.SrcIP.setHidden(True)
+        self.SrcPort.setHidden(True)
+        self.DstIP.setHidden(True)
+        self.DstPort.setHidden(True)
+        self.Clear.setHidden(True)
+
+    def disable_buttons(self):
+        self.TrafficType.setEnabled(False)
+        self.Action.setEnabled(False)
+        self.SrcIP.setEnabled(False)
+        self.SrcPort.setEnabled(False)
+        self.DstIP.setEnabled(False)
+        self.DstPort.setEnabled(False)
+
+    def enable_buttons(self):
+        self.TrafficType.setEnabled(True)
+        self.Action.setEnabled(True)
+        self.SrcIP.setEnabled(True)
+        self.SrcPort.setEnabled(True)
+        self.DstIP.setEnabled(True)
+        self.DstPort.setEnabled(True)
+
 ### DUNDER CHECK ###
 if __name__ == "__main__":
+    import sys
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
