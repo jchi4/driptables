@@ -652,6 +652,12 @@ class Ui_MainWindow(object):
                 commandline = subprocess.Popen([f"sudo iptables --insert {rules['chain']} {rules['num']} --protocol {rules['protocol']} --jump {rules['action']}{remainder_rule}"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
                 output, stderr_output = commandline.communicate()
                 self.view_rule() #calls view_rule function after adding rule (Updates iptable table on screen)
+                if "Index of insertion too big" in output.decode("utf-8"):
+                    msg = QMessageBox()
+                    msg.setWindowTitle("Error, Try Again!")
+                    msg.setText("Index of insertion too big!")
+                    msg.setIcon(QMessageBox.Critical)
+                    msg.exec_()
             else: #otherwise it is just normal adding mode
                 #print to see output format on commandline
                 print(f"sudo iptables --append {rules['chain']} --protocol {rules['protocol']} --jump {rules['action']}{remainder_rule}")
