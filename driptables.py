@@ -195,7 +195,6 @@ class Ui_MainWindow(object):
 
         #When a button is clicked (fuction calls)
         self.AddRule.clicked.connect(self.add_rule_button) #calls add_rule_button function when clicked. (Adds rule)
-        self.AddRule.clicked.connect(self.view_rule) #calls view_rule function when clicked. (Updates iptable table on screen)
         self.Reset.clicked.connect(self.show_popup) #calls show_popup function when clicked. (Confirmation screen)
         self.Clear.clicked.connect(self.clear_text) #calls clear_text when clicked. (Clear box text)
         self.TrafficType.currentIndexChanged.connect(self.disable_box) #calls disable_box when "Traffic Type" dropdown value changes. Checks for ICMP/IP
@@ -229,9 +228,9 @@ class Ui_MainWindow(object):
         self.view_rule()
 
         #Set Character Limit, 15 for IP including '.' and 5 for Port since 65535
-        self.SrcIP.setMaxLength(15)
+        self.SrcIP.setMaxLength(18)
         self.SrcPort.setMaxLength(5)
-        self.DstIP.setMaxLength(15)
+        self.DstIP.setMaxLength(18)
         self.DstPort.setMaxLength(5)
 
     def retranslateUi(self, MainWindow):
@@ -326,7 +325,8 @@ class Ui_MainWindow(object):
 
     #Add rule to the actual iptable in Linux
     def add_rule_button(self):
-        ip_regex = "^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])$" #regular expression for IPv4 address
+        ip_regex = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(\\d|[1-2]\\d|3[0-2]))?$" #regular expression for IPv4 address + CIDR notation
+        #ip_regex = "^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])$" #old regular expression for IPv4 address does not check for CIDR
         rule_flag = True #for checking if IP validation check passes
         boxes = {} #dictionary to store values from boxes
         boxes = {'chain':self.RuleChain,'protocol':self.TrafficType,'action':self.Action,'source':self.SrcIP,'src_port':self.SrcPort,'destination':self.DstIP,'dst_port':self.DstPort}
@@ -411,6 +411,7 @@ class Ui_MainWindow(object):
             #Run bash command to add to Linux iptables, command is built from dictionary variable values
             commandline = subprocess.Popen([f"sudo iptables --append {rules['chain']} --protocol {rules['protocol']} --jump {rules['action']}{remainder_rule}"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
             output, stderr_output = commandline.communicate()
+            self.view_rule() #calls view_rule function after adding rule (Updates iptable table on screen)
 
     #Confirmation popup box to flushing the tables. Options: "Yes" or "Cancel"
     def show_popup(self):
