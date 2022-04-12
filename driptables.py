@@ -245,6 +245,10 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
+        #Save file / Restore file
+        self.actionSave.triggered.connect(self.file_save)
+        self.actionRestore.triggered.connect(self.file_restore)
+
         #When a button is clicked (fuction calls)
         self.AddRule.clicked.connect(self.add_rule_button) #calls add_rule_button function when clicked. (Adds rule)
         self.RemoveRule.clicked.connect(self.remove_rule_button) #call remove_rule_button when clicked. (Removes rule)
@@ -362,6 +366,27 @@ class Ui_MainWindow(object):
         self.actionRestore.setText(_translate("MainWindow", "Restore"))
 
 ### HELPER FUNCTIONS ###
+    #saving the current ruleset to a file, user selects the path to save the file
+    def file_save(self):
+        filename = QFileDialog.getSaveFileName()
+        path = filename[0]
+        commandline = subprocess.Popen([f"sudo iptables-save > {path}"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+        output, stderr_output = commandline.communicate() #will save rules to a file
+        if path != "":
+            msg = QMessageBox()
+            msg.setWindowTitle("Saved")
+            msg.setText("iptables have been saved!")
+            msg.setIcon(QMessageBox.Information)
+            msg.exec_()
+
+    #restoring ruleset from a file
+    def file_restore(self):
+        filename = QFileDialog.getOpenFileName() #opens up file explorer and lets you select your file to restore
+        path = filename[0] #grabs just the path of that file, aka the absolute path, and feed the absolute path to the process to restore rules
+        commandline = subprocess.Popen([f"sudo iptables-restore < {path}"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+        output, stderr_output = commandline.communicate() #will import rules that were saved to the file
+        self.view_rule() #Updates iptable table on screen after restoring
+
     #Iptables Rule List, is called and then updates the table to have latest entry of the iptable on Linux machine
     def view_rule(self):
         view_all = subprocess.Popen(["sudo iptables -L -n --line-numbers"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True) #storing bash command to a variable "view_all"
