@@ -1,13 +1,14 @@
 # driptables
 
+A GUI version of iptables, created with Python and PyQt5
+
 ![driptables_logo](images/driptables_logo.png)
 
+![driptables_ui](images/driptables_ui.png)
 
-```
-GUI version of iptables
-GUI framework: PyQt5
-Backend language: Python
-```
+## Description 
+
+Driptables simplifies the configuration and maintenance of firewall rules in Linux. Individual rules can be added, removed, changed, and updated. All rules and rules under selected chains can be flushed, and rules can be saved to a file or restored.
 
 ## Prerequisites
 
@@ -32,8 +33,26 @@ iptables-persistent and netfilters-persistent will autosave your firewall config
 sudo-apt-get install iptables-persistent netfilter-persistent
 ```
 
-Prerequisites + additional packages + driptables:
+
+## Installation and Usage (for linux):
+
+
+To load all prerequisites, additional packages, and driptables:
 
 ```
 sudo bash -c "$(wget -nv -O - https://github.com/jchi4/driptables/raw/main/full.sh)"
 ```
+
+To download the program only:
+```
+wget https://github.com/jchi4/driptables/raw/main/driptables.py
+```
+
+## Capstone Documents
+
+[Project Proposal](https://github.com/jchi4/driptables/raw/main/documentation/Firewall%20GUI%20Proposal.pdf)
+[Proof of Concept](https://github.com/jchi4/driptables/raw/main/documentation/Proof%20of%20Concept.pdf)
+
+## License
+
+[MIT](https://github.com/jchi4/driptables/raw/main/LICENSE)
