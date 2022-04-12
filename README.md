@@ -51,6 +51,7 @@ wget https://github.com/jchi4/driptables/raw/main/driptables.py
 ## Capstone Documents
 
 [Project Proposal](https://github.com/jchi4/driptables/raw/main/documentation/Firewall%20GUI%20Proposal.pdf)
+
 [Proof of Concept](https://github.com/jchi4/driptables/raw/main/documentation/Proof%20of%20Concept.pdf)
 
 ## License
