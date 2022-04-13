@@ -2,7 +2,7 @@
 
 A GUI version of iptables, created with Python and PyQt5
 
-![driptables_ui]<img src="./main/images/driptables_ui.gif" width="50%" height="50%"/>
+![driptables_ui](https://github.com/jchi4/driptables/raw/main/images/driptables_ui.gif)
 
 ## Description 
 
