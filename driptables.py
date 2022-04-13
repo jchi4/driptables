@@ -15,8 +15,8 @@ dst_port = []
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1413, 881)
-        MainWindow.setStyleSheet("font: 13pt \"Roboto Slab\";\n""")
+        MainWindow.resize(1405, 881)
+        MainWindow.setStyleSheet("font: 13pt \"Roboto Slab\";\n""background-color: rgb(87, 109, 130);")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.RuleChain = QtWidgets.QComboBox(self.centralwidget)
@@ -45,6 +45,7 @@ class Ui_MainWindow(object):
         font.setItalic(False)
         font.setWeight(50)
         self.TrafficType.setFont(font)
+        self.TrafficType.setStyleSheet("")
         self.TrafficType.setObjectName("TrafficType")
         self.TrafficType.addItem("")
         self.TrafficType.setItemText(0, "Traffic Type")
@@ -89,7 +90,7 @@ class Ui_MainWindow(object):
         self.AddRule.setFont(font)
         self.AddRule.setObjectName("AddRule")
         self.Reset = QtWidgets.QPushButton(self.centralwidget)
-        self.Reset.setGeometry(QtCore.QRect(1270, 780, 131, 41))
+        self.Reset.setGeometry(QtCore.QRect(1270, 780, 121, 41))
         font = QtGui.QFont()
         font.setFamily("Roboto Slab")
         font.setPointSize(13)
@@ -120,19 +121,149 @@ class Ui_MainWindow(object):
         self.UpdateConfirm.setFont(font)
         self.UpdateConfirm.setObjectName("UpdateConfirm")
         self.RuleView = QtWidgets.QScrollArea(self.centralwidget)
-        self.RuleView.setGeometry(QtCore.QRect(10, 10, 1381, 581))
-        self.RuleView.setStyleSheet("background-color: rgb(61, 56, 70);")
+        self.RuleView.setGeometry(QtCore.QRect(10, 0, 1381, 591))
+        self.RuleView.setStyleSheet("background-color: rgb(151, 172, 194);\n""color: rgb(41, 56, 71);")
         self.RuleView.setWidgetResizable(True)
         self.RuleView.setObjectName("RuleView")
         self.RuleArea = QtWidgets.QWidget()
-        self.RuleArea.setGeometry(QtCore.QRect(0, 0, 1379, 579))
+        self.RuleArea.setGeometry(QtCore.QRect(0, 0, 1379, 589))
         self.RuleArea.setObjectName("RuleArea")
-        self.Title = QtWidgets.QLabel(self.RuleArea)
-        self.Title.setGeometry(QtCore.QRect(580, 0, 191, 19))
-        self.Title.setObjectName("Title")
-        self.showL = QtWidgets.QTextBrowser(self.RuleArea)
-        self.showL.setGeometry(QtCore.QRect(20, 30, 1331, 531))
-        self.showL.setObjectName("showL")
+        self.Input = QtWidgets.QLabel(self.RuleArea)
+        self.Input.setGeometry(QtCore.QRect(210, 0, 251, 19))
+        self.Input.setObjectName("Input")
+        self.tableWidget = QtWidgets.QTableWidget(self.RuleArea)
+        self.tableWidget.setEnabled(True)
+        self.tableWidget.setGeometry(QtCore.QRect(10, 20, 661, 561))
+        self.tableWidget.setStyleSheet("")
+        self.tableWidget.setGridStyle(QtCore.Qt.SolidLine)
+        self.tableWidget.setObjectName("tableWidget")
+        self.tableWidget.setColumnCount(6)
+        item = QtWidgets.QTableWidgetItem()
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        self.tableWidget.setVerticalHeaderItem(0, item)
+        item = QtWidgets.QTableWidgetItem()
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        self.tableWidget.setVerticalHeaderItem(1, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(0, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(1, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(2, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(3, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(4, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(5, item)
+        item = QtWidgets.QTableWidgetItem()
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        self.tableWidget.setItem(0, 0, item)
+        item = QtWidgets.QTableWidgetItem()
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        self.tableWidget.setItem(0, 1, item)
+        item = QtWidgets.QTableWidgetItem()
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        self.tableWidget.setItem(0, 2, item)
+        item = QtWidgets.QTableWidgetItem()
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        self.tableWidget.setItem(0, 3, item)
+        item = QtWidgets.QTableWidgetItem()
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        self.tableWidget.setItem(0, 4, item)
+        item = QtWidgets.QTableWidgetItem()
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        self.tableWidget.setItem(0, 5, item)
+        self.Forward = QtWidgets.QLabel(self.RuleArea)
+        self.Forward.setGeometry(QtCore.QRect(920, 0, 291, 19))
+        self.Forward.setObjectName("Forward")
+        self.Output = QtWidgets.QLabel(self.RuleArea)
+        self.Output.setGeometry(QtCore.QRect(920, 300, 281, 19))
+        self.Output.setObjectName("Output")
+        self.tableWidget_2 = QtWidgets.QTableWidget(self.RuleArea)
+        self.tableWidget_2.setEnabled(True)
+        self.tableWidget_2.setGeometry(QtCore.QRect(690, 20, 671, 261))
+        self.tableWidget_2.setStyleSheet("")
+        self.tableWidget_2.setObjectName("tableWidget_2")
+        self.tableWidget_2.setColumnCount(6)
+        item = QtWidgets.QTableWidgetItem()
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        self.tableWidget_2.setVerticalHeaderItem(0, item)
+        item = QtWidgets.QTableWidgetItem()
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        self.tableWidget_2.setVerticalHeaderItem(1, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget_2.setHorizontalHeaderItem(0, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget_2.setHorizontalHeaderItem(1, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget_2.setHorizontalHeaderItem(2, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget_2.setHorizontalHeaderItem(3, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget_2.setHorizontalHeaderItem(4, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget_2.setHorizontalHeaderItem(5, item)
+        item = QtWidgets.QTableWidgetItem()
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        self.tableWidget_2.setItem(0, 0, item)
+        item = QtWidgets.QTableWidgetItem()
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        self.tableWidget_2.setItem(0, 1, item)
+        item = QtWidgets.QTableWidgetItem()
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        self.tableWidget_2.setItem(0, 2, item)
+        item = QtWidgets.QTableWidgetItem()
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        self.tableWidget_2.setItem(0, 3, item)
+        item = QtWidgets.QTableWidgetItem()
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        self.tableWidget_2.setItem(0, 4, item)
+        item = QtWidgets.QTableWidgetItem()
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        self.tableWidget_2.setItem(0, 5, item)
+        self.tableWidget_3 = QtWidgets.QTableWidget(self.RuleArea)
+        self.tableWidget_3.setEnabled(True)
+        self.tableWidget_3.setGeometry(QtCore.QRect(690, 320, 671, 261))
+        self.tableWidget_3.setStyleSheet("")
+        self.tableWidget_3.setObjectName("tableWidget_3")
+        self.tableWidget_3.setColumnCount(6)
+        item = QtWidgets.QTableWidgetItem()
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        self.tableWidget_3.setVerticalHeaderItem(0, item)
+        item = QtWidgets.QTableWidgetItem()
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        self.tableWidget_3.setVerticalHeaderItem(1, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget_3.setHorizontalHeaderItem(0, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget_3.setHorizontalHeaderItem(1, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget_3.setHorizontalHeaderItem(2, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget_3.setHorizontalHeaderItem(3, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget_3.setHorizontalHeaderItem(4, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget_3.setHorizontalHeaderItem(5, item)
+        item = QtWidgets.QTableWidgetItem()
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        self.tableWidget_3.setItem(0, 0, item)
+        item = QtWidgets.QTableWidgetItem()
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        self.tableWidget_3.setItem(0, 1, item)
+        item = QtWidgets.QTableWidgetItem()
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        self.tableWidget_3.setItem(0, 2, item)
+        item = QtWidgets.QTableWidgetItem()
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        self.tableWidget_3.setItem(0, 3, item)
+        item = QtWidgets.QTableWidgetItem()
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        self.tableWidget_3.setItem(0, 4, item)
+        item = QtWidgets.QTableWidgetItem()
+        item.setTextAlignment(QtCore.Qt.AlignCenter)
+        self.tableWidget_3.setItem(0, 5, item)
         self.RuleView.setWidget(self.RuleArea)
         self.SourceLabel = QtWidgets.QLabel(self.centralwidget)
         self.SourceLabel.setGeometry(QtCore.QRect(680, 600, 81, 19))
@@ -157,15 +288,15 @@ class Ui_MainWindow(object):
         self.RuleChainLabel.setObjectName("RuleChainLabel")
         self.Check_Add = QtWidgets.QLabel(self.centralwidget)
         self.Check_Add.setGeometry(QtCore.QRect(820, 720, 91, 31))
-        self.Check_Add.setStyleSheet("background-color: rgb(255, 255, 255);\n""color: rgb(0, 0, 0);")
+        self.Check_Add.setStyleSheet("background-color: rgb(196, 196, 196);\n""color: rgb(0, 0, 0);")
         self.Check_Add.setObjectName("Check_Add")
         self.Check_Remove = QtWidgets.QCheckBox(self.centralwidget)
         self.Check_Remove.setGeometry(QtCore.QRect(820, 780, 91, 31))
-        self.Check_Remove.setStyleSheet("background-color: rgb(255, 255, 255);\n""color: rgb(0, 0, 0);")
+        self.Check_Remove.setStyleSheet("background-color: rgb(196, 196, 196);\n""color: rgb(0, 0, 0);")
         self.Check_Remove.setObjectName("Check_Remove")
         self.Check_Update = QtWidgets.QCheckBox(self.centralwidget)
         self.Check_Update.setGeometry(QtCore.QRect(820, 750, 91, 31))
-        self.Check_Update.setStyleSheet("background-color: rgb(255, 255, 255);\n""color: rgb(0, 0, 0);")
+        self.Check_Update.setStyleSheet("background-color: rgb(196, 196, 196);\n""color: rgb(0, 0, 0);")
         self.Check_Update.setObjectName("Check_Update")
         self.spinBox = QtWidgets.QSpinBox(self.centralwidget)
         self.spinBox.setGeometry(QtCore.QRect(20, 620, 61, 61))
@@ -182,6 +313,8 @@ class Ui_MainWindow(object):
         font.setItalic(False)
         font.setWeight(50)
         self.RemoveRule.setFont(font)
+        self.RemoveRule.setContextMenuPolicy(QtCore.Qt.PreventContextMenu)
+        self.RemoveRule.setStyleSheet("")
         self.RemoveRule.setObjectName("RemoveRule")
         self.spinBox_Remove = QtWidgets.QSpinBox(self.centralwidget)
         self.spinBox_Remove.setGeometry(QtCore.QRect(330, 740, 61, 61))
@@ -222,11 +355,11 @@ class Ui_MainWindow(object):
         self.DstPort.setGeometry(QtCore.QRect(1170, 620, 81, 61))
         self.DstPort.setObjectName("DstPort")
         self.toolButton = QtWidgets.QToolButton(self.centralwidget)
-        self.toolButton.setGeometry(QtCore.QRect(10, 790, 61, 26))
+        self.toolButton.setGeometry(QtCore.QRect(20, 800, 61, 26))
         self.toolButton.setObjectName("toolButton")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1413, 28))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1405, 28))
         self.menubar.setObjectName("menubar")
         self.menuSave = QtWidgets.QMenu(self.menubar)
         self.menuSave.setObjectName("menuSave")
@@ -317,6 +450,35 @@ class Ui_MainWindow(object):
         self.DstPort.setMaxLength(5)
         #self.spinBox.setMinimum(1)
 
+        input_header = self.tableWidget.horizontalHeader()
+        input_header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents) #Accept
+        input_header.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeToContents) #Protocol
+        input_header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch) #srcIP
+        input_header.setSectionResizeMode(3, QtWidgets.QHeaderView.ResizeToContents) #srcPort
+        input_header.setSectionResizeMode(4, QtWidgets.QHeaderView.Stretch) #destinationIP
+        input_header.setSectionResizeMode(5, QtWidgets.QHeaderView.ResizeToContents) #destPort
+
+        forward_header = self.tableWidget_2.horizontalHeader()
+        forward_header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents) #Accept
+        forward_header.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeToContents) #Protocol
+        forward_header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch) #srcIP
+        forward_header.setSectionResizeMode(3, QtWidgets.QHeaderView.ResizeToContents) #srcPort
+        forward_header.setSectionResizeMode(4, QtWidgets.QHeaderView.Stretch) #destinationIP
+        forward_header.setSectionResizeMode(5, QtWidgets.QHeaderView.ResizeToContents) #destPort
+
+        output_header = self.tableWidget_3.horizontalHeader()
+        output_header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents) #Accept
+        output_header.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeToContents) #Protocol
+        output_header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch) #srcIP
+        output_header.setSectionResizeMode(3, QtWidgets.QHeaderView.ResizeToContents) #srcPort
+        output_header.setSectionResizeMode(4, QtWidgets.QHeaderView.Stretch) #destinationIP
+        output_header.setSectionResizeMode(5, QtWidgets.QHeaderView.ResizeToContents) #destPort
+
+        #function call at the beginning to initialize the current table when loading the application
+        # self.load_input()
+        # self.load_forward()
+        # self.load_output()
+
     #Renaming the items
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -333,12 +495,56 @@ class Ui_MainWindow(object):
         self.Action.setItemText(1, _translate("MainWindow", "ACCEPT"))
         self.Action.setItemText(2, _translate("MainWindow", "DROP"))
         self.Action.setItemText(3, _translate("MainWindow", "REJECT"))
-        self.Clear.setText(_translate("MainWindow", "CLEAR"))
+        self.Clear.setText(_translate("MainWindow", "🚮 CLEAR"))
         self.AddRule.setText(_translate("MainWindow", "Add Rule"))
-        self.Reset.setText(_translate("MainWindow", "Reset Rules"))
+        self.Reset.setText(_translate("MainWindow", "⛔ Reset Rules"))
         self.UpdateRule.setText(_translate("MainWindow", "Update Rule"))
         self.UpdateConfirm.setText(_translate("MainWindow", "Confirm"))
-        self.Title.setText(_translate("MainWindow", "Current IP Tables Rules"))
+        item = self.tableWidget.horizontalHeaderItem(0)
+        item.setText(_translate("MainWindow", "Target"))
+        item = self.tableWidget.horizontalHeaderItem(1)
+        item.setText(_translate("MainWindow", "Protocol"))
+        item = self.tableWidget.horizontalHeaderItem(2)
+        item.setText(_translate("MainWindow", "Source IP"))
+        item = self.tableWidget.horizontalHeaderItem(3)
+        item.setText(_translate("MainWindow", "Src Port"))
+        item = self.tableWidget.horizontalHeaderItem(4)
+        item.setText(_translate("MainWindow", "Destination IP"))
+        item = self.tableWidget.horizontalHeaderItem(5)
+        item.setText(_translate("MainWindow", "Dest Port"))
+        __sortingEnabled = self.tableWidget.isSortingEnabled()
+        self.tableWidget.setSortingEnabled(False)
+        self.tableWidget.setSortingEnabled(__sortingEnabled)
+        item = self.tableWidget_2.horizontalHeaderItem(0)
+        item.setText(_translate("MainWindow", "Target"))
+        item = self.tableWidget_2.horizontalHeaderItem(1)
+        item.setText(_translate("MainWindow", "Protocol"))
+        item = self.tableWidget_2.horizontalHeaderItem(2)
+        item.setText(_translate("MainWindow", "Source IP"))
+        item = self.tableWidget_2.horizontalHeaderItem(3)
+        item.setText(_translate("MainWindow", "Src Port"))
+        item = self.tableWidget_2.horizontalHeaderItem(4)
+        item.setText(_translate("MainWindow", "Destination IP"))
+        item = self.tableWidget_2.horizontalHeaderItem(5)
+        item.setText(_translate("MainWindow", "Dest Port"))
+        __sortingEnabled = self.tableWidget_2.isSortingEnabled()
+        self.tableWidget_2.setSortingEnabled(False)
+        self.tableWidget_2.setSortingEnabled(__sortingEnabled)
+        item = self.tableWidget_3.horizontalHeaderItem(0)
+        item.setText(_translate("MainWindow", "Target"))
+        item = self.tableWidget_3.horizontalHeaderItem(1)
+        item.setText(_translate("MainWindow", "Protocol"))
+        item = self.tableWidget_3.horizontalHeaderItem(2)
+        item.setText(_translate("MainWindow", "Source IP"))
+        item = self.tableWidget_3.horizontalHeaderItem(3)
+        item.setText(_translate("MainWindow", "Src Port"))
+        item = self.tableWidget_3.horizontalHeaderItem(4)
+        item.setText(_translate("MainWindow", "Destination IP"))
+        item = self.tableWidget_3.horizontalHeaderItem(5)
+        item.setText(_translate("MainWindow", "Dest Port"))
+        __sortingEnabled = self.tableWidget_3.isSortingEnabled()
+        self.tableWidget_3.setSortingEnabled(False)
+        self.tableWidget_3.setSortingEnabled(__sortingEnabled)
         self.SourceLabel.setText(_translate("MainWindow", "Source IP"))
         self.SrcPortLabel.setText(_translate("MainWindow", "Src Port"))
         self.DestinationLabel.setText(_translate("MainWindow", "Destination IP"))
@@ -350,7 +556,7 @@ class Ui_MainWindow(object):
         self.Check_Remove.setText(_translate("MainWindow", "Remove"))
         self.Check_Update.setText(_translate("MainWindow", "Update"))
         self.Num.setText(_translate("MainWindow", "Num"))
-        self.RemoveRule.setText(_translate("MainWindow", "Remove Rule"))
+        self.RemoveRule.setText(_translate("MainWindow", "🗑️ Remove Rule"))
         self.RuleChain_Remove.setItemText(1, _translate("MainWindow", "INPUT"))
         self.RuleChain_Remove.setItemText(2, _translate("MainWindow", "FORWARD"))
         self.RuleChain_Remove.setItemText(3, _translate("MainWindow", "OUTPUT"))
@@ -360,12 +566,111 @@ class Ui_MainWindow(object):
         self.DstIP.setPlaceholderText(_translate("MainWindow", "Destination IP"))
         self.SrcPort.setPlaceholderText(_translate("MainWindow", "Src Port"))
         self.DstPort.setPlaceholderText(_translate("MainWindow", "Dst Port"))
-        self.toolButton.setText(_translate("MainWindow", "Info"))
+        self.toolButton.setText(_translate("MainWindow", "Info 🔍"))
         self.menuSave.setTitle(_translate("MainWindow", "File"))
-        self.actionSave.setText(_translate("MainWindow", "Save"))
-        self.actionRestore.setText(_translate("MainWindow", "Restore"))
+        self.actionSave.setText(_translate("MainWindow", "Save 💾"))
+        self.actionRestore.setText(_translate("MainWindow", "Restore 🔄"))
 
 ### HELPER FUNCTIONS ###
+    def load_input(self):
+        commandline = subprocess.Popen([f"sudo iptables -L INPUT -n --line-numbers | sed -e '1,2d'"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+        test, stderr_output = commandline.communicate() #storing the output of the commandline to variable output
+        test = test.decode("utf-8") #saving the output as a string type to parse
+        tablerow = 0 #increment the table row
+        self.tableWidget.setRowCount(0) #set it to zero if no rules
+        for line in test.splitlines(): #parsing each line in the INPUT CHAIN
+            line = line.split() #putting all data into a list, example: ['1', 'ACCEPT', 'tcp', '--', '8.8.8.8', '1.1.1.1', 'tcp', 'spt:24', 'dpt:23']
+            self.tableWidget.setRowCount(int(line[0])) #setting the row per how many rules there are
+            if line[2] == 'icmp' and line[2] == 'all': #only ip/icmp ruleset meaning NO SRC/DST PORT #
+                self.tableWidget.setItem(tablerow, 0, QtWidgets.QTableWidgetItem(line[1])) #insert target (accept,drop,reject)
+                self.tableWidget.setItem(tablerow, 1, QtWidgets.QTableWidgetItem(line[2].upper())) #insert protocol
+                self.tableWidget.setItem(tablerow, 2, QtWidgets.QTableWidgetItem(line[4])) #insert src ip
+                self.tableWidget.setItem(tablerow, 4, QtWidgets.QTableWidgetItem(line[5])) #insert dst ip
+            elif len(line) <= 6: #any other protocol that doesn't have src/dst port
+                self.tableWidget.setItem(tablerow, 0, QtWidgets.QTableWidgetItem(line[1])) #insert target (accept,drop,reject)
+                self.tableWidget.setItem(tablerow, 1, QtWidgets.QTableWidgetItem(line[2].upper())) #insert protocol
+                self.tableWidget.setItem(tablerow, 2, QtWidgets.QTableWidgetItem(line[4])) #insert src ip
+                self.tableWidget.setItem(tablerow, 4, QtWidgets.QTableWidgetItem(line[5])) #insert dst ip
+            else: #for rules with src/dst port and more data
+                self.tableWidget.setItem(tablerow, 0, QtWidgets.QTableWidgetItem(line[1])) #insert target (accept,drop,reject)
+                self.tableWidget.setItem(tablerow, 1, QtWidgets.QTableWidgetItem(line[2].upper())) #insert protocol
+                self.tableWidget.setItem(tablerow, 2, QtWidgets.QTableWidgetItem(line[4])) #insert src ip
+                self.tableWidget.setItem(tablerow, 4, QtWidgets.QTableWidgetItem(line[5])) #insert dst ip
+                if len(line) >= 9: #if spt and dpt exists, save both then append both
+                    self.tableWidget.setItem(tablerow, 3, QtWidgets.QTableWidgetItem(line[7][4:])) #insert src port
+                    self.tableWidget.setItem(tablerow, 5, QtWidgets.QTableWidgetItem(line[8][4:])) #insert dst port
+                elif 'spt' in line[7]: #if spt is index 7, insert src port
+                    self.tableWidget.setItem(tablerow, 3, QtWidgets.QTableWidgetItem(line[7][4:]))
+                elif 'dpt' in line[7]: #if dpt is index 7, insert dst port
+                    self.tableWidget.setItem(tablerow, 5, QtWidgets.QTableWidgetItem(line[7][4:]))
+            tablerow += 1 #increment very important to add every rule to the table. From first rule to final rule.
+
+    def load_forward(self):
+        commandline = subprocess.Popen([f"sudo iptables -L FORWARD -n --line-numbers | sed -e '1,2d'"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+        test, stderr_output = commandline.communicate() #storing the output of the commandline to variable output
+        test = test.decode("utf-8") #saving the output as a string type to parse
+        tablerow = 0 #increment the table row
+        self.tableWidget_2.setRowCount(0) #set it to zero if no rules
+        for line in test.splitlines(): #parsing each line in the INPUT CHAIN
+            line = line.split() #putting all data into a list, example: ['1', 'ACCEPT', 'tcp', '--', '8.8.8.8', '1.1.1.1', 'tcp', 'spt:24', 'dpt:23']
+            self.tableWidget_2.setRowCount(int(line[0])) #setting the row per how many rules there are
+            if line[2] == 'icmp' and line[2] == 'all': #only ip/icmp ruleset meaning NO SRC/DST PORT #
+                self.tableWidget_2.setItem(tablerow, 0, QtWidgets.QTableWidgetItem(line[1])) #insert target (accept,drop,reject)
+                self.tableWidget_2.setItem(tablerow, 1, QtWidgets.QTableWidgetItem(line[2].upper())) #insert protocol
+                self.tableWidget_2.setItem(tablerow, 2, QtWidgets.QTableWidgetItem(line[4])) #insert src ip
+                self.tableWidget_2.setItem(tablerow, 4, QtWidgets.QTableWidgetItem(line[5])) #insert dst ip
+            elif len(line) <= 6: #any other protocol that doesn't have src/dst port
+                self.tableWidget_2.setItem(tablerow, 0, QtWidgets.QTableWidgetItem(line[1])) #insert target (accept,drop,reject)
+                self.tableWidget_2.setItem(tablerow, 1, QtWidgets.QTableWidgetItem(line[2].upper())) #insert protocol
+                self.tableWidget_2.setItem(tablerow, 2, QtWidgets.QTableWidgetItem(line[4])) #insert src ip
+                self.tableWidget_2.setItem(tablerow, 4, QtWidgets.QTableWidgetItem(line[5])) #insert dst ip
+            else: #for rules with src/dst port and more data
+                self.tableWidget_2.setItem(tablerow, 0, QtWidgets.QTableWidgetItem(line[1])) #insert target (accept,drop,reject)
+                self.tableWidget_2.setItem(tablerow, 1, QtWidgets.QTableWidgetItem(line[2].upper())) #insert protocol
+                self.tableWidget_2.setItem(tablerow, 2, QtWidgets.QTableWidgetItem(line[4])) #insert src ip
+                self.tableWidget_2.setItem(tablerow, 4, QtWidgets.QTableWidgetItem(line[5])) #insert dst ip
+                if len(line) >= 9: #if spt and dpt exists, save both then append both
+                    self.tableWidget_2.setItem(tablerow, 3, QtWidgets.QTableWidgetItem(line[7][4:])) #insert src port
+                    self.tableWidget_2.setItem(tablerow, 5, QtWidgets.QTableWidgetItem(line[8][4:])) #insert dst port
+                elif 'spt' in line[7]: #if spt is index 7, insert src port
+                    self.tableWidget_2.setItem(tablerow, 3, QtWidgets.QTableWidgetItem(line[7][4:]))
+                elif 'dpt' in line[7]: #if dpt is index 7, insert dst port
+                    self.tableWidget_2.setItem(tablerow, 5, QtWidgets.QTableWidgetItem(line[7][4:]))
+            tablerow += 1 #increment very important to add every rule to the table. From first rule to final rule.
+
+    def load_output(self):
+        commandline = subprocess.Popen([f"sudo iptables -L OUTPUT -n --line-numbers | sed -e '1,2d'"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+        test, stderr_output = commandline.communicate() #storing the output of the commandline to variable output
+        test = test.decode("utf-8") #saving the output as a string type to parse
+        tablerow = 0 #increment the table row
+        self.tableWidget_3.setRowCount(0) #set it to zero if no rules
+        for line in test.splitlines(): #parsing each line in the INPUT CHAIN
+            line = line.split() #putting all data into a list, example: ['1', 'ACCEPT', 'tcp', '--', '8.8.8.8', '1.1.1.1', 'tcp', 'spt:24', 'dpt:23']
+            self.tableWidget_3.setRowCount(int(line[0])) #setting the row per how many rules there are
+            if line[2] == 'icmp' and line[2] == 'all': #only ip/icmp ruleset meaning NO SRC/DST PORT #
+                self.tableWidget_3.setItem(tablerow, 0, QtWidgets.QTableWidgetItem(line[1])) #insert target (accept,drop,reject)
+                self.tableWidget_3.setItem(tablerow, 1, QtWidgets.QTableWidgetItem(line[2].upper())) #insert protocol
+                self.tableWidget_3.setItem(tablerow, 2, QtWidgets.QTableWidgetItem(line[4])) #insert src ip
+                self.tableWidget_3.setItem(tablerow, 4, QtWidgets.QTableWidgetItem(line[5])) #insert dst ip
+            elif len(line) <= 6: #any other protocol that doesn't have src/dst port
+                self.tableWidget_3.setItem(tablerow, 0, QtWidgets.QTableWidgetItem(line[1])) #insert target (accept,drop,reject)
+                self.tableWidget_3.setItem(tablerow, 1, QtWidgets.QTableWidgetItem(line[2].upper())) #insert protocol
+                self.tableWidget_3.setItem(tablerow, 2, QtWidgets.QTableWidgetItem(line[4])) #insert src ip
+                self.tableWidget_3.setItem(tablerow, 4, QtWidgets.QTableWidgetItem(line[5])) #insert dst ip
+            else: #for rules with src/dst port and more data
+                self.tableWidget_3.setItem(tablerow, 0, QtWidgets.QTableWidgetItem(line[1])) #insert target (accept,drop,reject)
+                self.tableWidget_3.setItem(tablerow, 1, QtWidgets.QTableWidgetItem(line[2].upper())) #insert protocol
+                self.tableWidget_3.setItem(tablerow, 2, QtWidgets.QTableWidgetItem(line[4])) #insert src ip
+                self.tableWidget_3.setItem(tablerow, 4, QtWidgets.QTableWidgetItem(line[5])) #insert dst ip
+                if len(line) >= 9: #if spt and dpt exists, save both then append both
+                    self.tableWidget_3.setItem(tablerow, 3, QtWidgets.QTableWidgetItem(line[7][4:])) #insert src port
+                    self.tableWidget_3.setItem(tablerow, 5, QtWidgets.QTableWidgetItem(line[8][4:])) #insert dst port
+                elif 'spt' in line[7]: #if spt is index 7, insert src port
+                    self.tableWidget_3.setItem(tablerow, 3, QtWidgets.QTableWidgetItem(line[7][4:]))
+                elif 'dpt' in line[7]: #if dpt is index 7, insert dst port
+                    self.tableWidget_3.setItem(tablerow, 5, QtWidgets.QTableWidgetItem(line[7][4:]))
+            tablerow += 1 #increment very important to add every rule to the table. From first rule to final rule
+
     #saving the current ruleset to a file, user selects the path to save the file
     def file_save(self):
         filename = QFileDialog.getSaveFileName()
@@ -389,12 +694,33 @@ class Ui_MainWindow(object):
 
     #Iptables Rule List, is called and then updates the table to have latest entry of the iptable on Linux machine
     def view_rule(self):
-        view_all = subprocess.Popen(["sudo iptables -L -n --line-numbers"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True) #storing bash command to a variable "view_all"
-        current, stderr_current = view_all.communicate() #stderr_current is holding metadata unimportant whereas current holds value of output from command
-        current = current.decode("utf-8") #data type is "bytes" so needs to use decode to transfer to type "string"
-        self.showL.setText(current)
-        self.showL.selectAll() #selecting all plaintext
-        self.showL.setAlignment(QtCore.Qt.AlignCenter) #centering all text selected in previous statement
+        commandline = subprocess.Popen([f"sudo iptables -L INPUT -n --line-numbers | head -n1"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+        input, stderr_output = commandline.communicate() #storing the output of the commandline to variable output
+        input = input.decode("utf-8") #saving the output as a string type to parse
+        input = input.split("(policy ") #using delimiter to grab only the policy type
+        input_policy = input[1][:-2].strip()
+
+        commandline = subprocess.Popen([f"sudo iptables -L FORWARD -n --line-numbers | head -n1"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+        forward, stderr_output = commandline.communicate() #storing the output of the commandline to variable output
+        forward = forward.decode("utf-8") #saving the output as a string type to parse
+        forward = forward.split("(policy ") #using delimiter to grab only the policy type
+        forward_policy = forward[1][:-2].strip()
+
+        commandline = subprocess.Popen([f"sudo iptables -L OUTPUT -n --line-numbers | head -n1"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+        output, stderr_output = commandline.communicate() #storing the output of the commandline to variable output
+        output = output.decode("utf-8") #saving the output as a string type to parse
+        output = output.split("(policy ") #using delimiter to grab only the policy type
+        output_policy = output[1][:-2].strip()
+
+        #setting the label type to be either "ACCEPT | DROP" depending on which state it is natively
+        self.Input.setText(QtCore.QCoreApplication.translate("MainWindow", f"Chain INPUT (policy {input_policy})"))
+        self.Forward.setText(QtCore.QCoreApplication.translate("MainWindow", f"Chain FORWARD (policy {forward_policy})"))
+        self.Output.setText(QtCore.QCoreApplication.translate("MainWindow", f"Chain OUTPUT (policy {output_policy})"))
+
+        #loading each 3 table's data
+        self.load_input()
+        self.load_forward()
+        self.load_output()
 
     #Confirmation button for updating 1 rule at a time in update mode state (will grab num and rule chain)
     def confirm_button(self):
@@ -408,7 +734,7 @@ class Ui_MainWindow(object):
         output, stderr_output = commandline.communicate() #storing the output of the commandline to variable output
         output = output.decode("utf-8") #saving the output as a string type
         output = output.split() #List data type where: 0=num, 1=ACTION, 2=PROTOCOL, 3=opt, 4=srcIP, 5=dstIP, 6=port protocol, 7=spt, 8=dpt (7 & 8 can be interchange due to not having spt but having dpt)
-        print(output)
+        #print(output) #print statement for testing
         #Validation checking process for valid output given from commandline
         if output != []: #if there is no error and selected a valid num and chain that exists proceed forward
             num = output[0]
@@ -498,7 +824,7 @@ class Ui_MainWindow(object):
                 rule_flag = False
                 msg = QMessageBox()
                 msg.setWindowTitle("Error, Try Again!")
-                msg.setText("Source IP and Destination IP Address are Invalid.")
+                msg.setText("Source IP or Destination IP Address are Invalid.")
                 msg.setIcon(QMessageBox.Critical)
                 msg.exec_()
         elif rules['source'] != '': #if source IP has fields
@@ -556,8 +882,8 @@ class Ui_MainWindow(object):
                 rules['dst_port'] = ' --dport ' + rules['dst_port']
             remainder_rule = rules['source'] + rules['src_port'] + rules['destination'] + rules['dst_port']
 
-            #print to see output format on commandline
-            print(f"sudo iptables -R {rules['chain']} {rules['num']} --protocol {rules['protocol']} --jump {rules['action']}{remainder_rule}")
+            #print to see output format on commandline, testing
+            #print(f"sudo iptables -R {rules['chain']} {rules['num']} --protocol {rules['protocol']} --jump {rules['action']}{remainder_rule}")
             #Run bash command to replace item in Linux iptables, command is built from dictionary variable values
             commandline = subprocess.Popen([f"sudo iptables -R {rules['chain']} {rules['num']} --protocol {rules['protocol']} --jump {rules['action']}{remainder_rule}"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
             output, stderr_output = commandline.communicate()
@@ -569,7 +895,7 @@ class Ui_MainWindow(object):
         removal['num'] = str(self.spinBox_Remove.value())
         removal['chain'] = self.RuleChain_Remove.currentText()
         #print to see output format on commandline
-        print(f"sudo iptables -D {removal['chain']} {removal['num']}")
+        #print(f"sudo iptables -D {removal['chain']} {removal['num']}")
         #Run bash command to remove rule from Linux iptables, command is built from dictionary variable values
         commandline = subprocess.Popen([f"sudo iptables -D {removal['chain']} {removal['num']}"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
         output, stderr_output = commandline.communicate()
@@ -611,7 +937,7 @@ class Ui_MainWindow(object):
                 rule_flag = False
                 msg = QMessageBox()
                 msg.setWindowTitle("Error, Try Again!")
-                msg.setText("Source IP and Destination IP Address are Invalid.")
+                msg.setText("Source IP or Destination IP Address are Invalid.")
                 msg.setIcon(QMessageBox.Critical)
                 msg.exec_()
         elif rules['source'] != '': #if source IP has fields
@@ -672,7 +998,7 @@ class Ui_MainWindow(object):
             #insert mode if num spinbox is active
             if boxes['num'].value() > 0:
                 #print to see output format on commandline
-                print(f"sudo iptables --insert {rules['chain']} {rules['num']} --protocol {rules['protocol']} --jump {rules['action']}{remainder_rule}")
+                #print(f"sudo iptables --insert {rules['chain']} {rules['num']} --protocol {rules['protocol']} --jump {rules['action']}{remainder_rule}")
                 #Run bash command to insert to Linux iptables, command is built from dictionary variable values
                 commandline = subprocess.Popen([f"sudo iptables --insert {rules['chain']} {rules['num']} --protocol {rules['protocol']} --jump {rules['action']}{remainder_rule}"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
                 output, stderr_output = commandline.communicate()
@@ -685,7 +1011,7 @@ class Ui_MainWindow(object):
                     msg.exec_()
             else: #otherwise it is just normal adding mode
                 #print to see output format on commandline
-                print(f"sudo iptables --append {rules['chain']} --protocol {rules['protocol']} --jump {rules['action']}{remainder_rule}")
+                #print(f"sudo iptables --append {rules['chain']} --protocol {rules['protocol']} --jump {rules['action']}{remainder_rule}")
                 #Run bash command to add to Linux iptables, command is built from dictionary variable values
                 commandline = subprocess.Popen([f"sudo iptables --append {rules['chain']} --protocol {rules['protocol']} --jump {rules['action']}{remainder_rule}"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
                 output, stderr_output = commandline.communicate()
